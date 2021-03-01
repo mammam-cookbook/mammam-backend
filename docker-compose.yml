@@ -1,22 +1,22 @@
 version: '3.4'
 
 services:
-  mammam-backend:
-    image: mammam-backend
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5434/web
-      NODE_ENV: development
-      PORT: 3000
-    depends_on:
-      - postgres
-    ports:
-      - 3000:3000
-    command: npm run dev
-    volumes:
-      - .src:/app/src
+  # mammam-backend:
+  #   image: mammam-backend
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #   environment:
+  #     DATABASE_URL: postgres://postgres:postgres@postgres:5434/web
+  #     NODE_ENV: development
+  #     PORT: 3000
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - 3000:3000
+  #   command: npm run dev
+  #   volumes:
+  #     - .src:/app/src
 
   redis:
     image: redis:latest

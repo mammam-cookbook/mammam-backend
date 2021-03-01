@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-
+require("dotenv").config();
 //Log request
 const morgan = require('morgan');
 app.use(morgan('dev'));
@@ -8,15 +8,18 @@ app.use(morgan('dev'));
 const cors = require("cors");
 app.use(cors());
 
-app.get('/api', (req,res)=>{
-    console.log("=============req===========");
-    return res.json({
-        a: 'Welcome'
-    })
-    // next()
-})
+//Use body parser
+let bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: "5mb" }));
+
+
+//Config route
+app.use("/api/auth", require("./routes/auth.route"));
+app.use("/api/user", require("./routes/user.route"));
 
 app.use(function (req, res, next) {
+  console.log('------ req.body -------', req.body);
   res.status(404).send({
     message: "Resource not found!",
   });
