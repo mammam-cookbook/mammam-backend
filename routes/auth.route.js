@@ -1,4 +1,5 @@
 const router = require("express").Router();
+require("dotenv").config();
 const userRepo = require("../repository/user.repo");
 const models = require("../models");
 const jwt = require("jsonwebtoken");
@@ -23,7 +24,7 @@ router.post("/", async function (req, res) {
         err : "Password is wrong!!!"
       })
     }
-    const token = jwt.sign({ id: findUser.id },"Skasdkajs6dkajsd6kjaksd6jkasd", {
+    const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
       expiresIn: "10d"
     });
     console.log({ token });
