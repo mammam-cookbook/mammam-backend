@@ -21,11 +21,11 @@ module.exports = {
             allowNull: true,
         },
         avatar: {
-            type: DataTypes.TEXT,
+            type: DataTypes.ARRAY(DataTypes.TEXT),
             allowNull: true,
         },
         status: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.ENUM('Pending', 'Approved'),
             allowNull: false,
         },
         user_id: {
@@ -39,7 +39,8 @@ module.exports = {
             onDelete: 'cascade'
         },
         steps: DataTypes.ARRAY(DataTypes.JSONB),
-        ingredients : DataTypes.ARRAY(DataTypes.STRING),
+        ingredients : DataTypes.ARRAY(DataTypes.JSONB),
+        ingredients_name : DataTypes.ARRAY(DataTypes.STRING),
         hashtags : DataTypes.ARRAY(DataTypes.STRING),
         categories: DataTypes.ARRAY(DataTypes.STRING),
         created_at: {

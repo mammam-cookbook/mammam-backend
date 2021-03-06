@@ -4,6 +4,8 @@ const { register_message } = require("../utils/mail.model");
 const sendMail = require("../utils/mailer");
 const { route } = require("./auth.route");
 
+router.get('/', (req, res) => {
+})
 
 router.post("/", async function (req, res) {
   const user = req.body;

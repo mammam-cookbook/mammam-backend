@@ -1,6 +1,15 @@
 const router = require("express").Router();
 const recipeRepo = require("../repository/recipe.repo");
-const authorize = require('../middlewares/authorize')
+const authorize = require('../middlewares/authorize');
+
+router.get("/", async function (req, res) {
+  const result = await recipeRepo.filter(req.query);
+  if (result) {
+    res.status(200).json({
+      result
+    })
+  }
+});
 
 router.post("/",authorize, async function (req, res) {
   const recipe = req.body;
@@ -21,7 +30,7 @@ router.get("/:id",async (req, res) => {
     return res.status(400).json({
       message: "Recipe not found!"
     })
-  }
+  }   
   return res.status(200).json({
     recipe
   })

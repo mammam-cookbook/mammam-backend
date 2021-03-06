@@ -21,13 +21,12 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
             },
             avatar: {
-                type: DataTypes.TEXT,
+                type: DataTypes.ARRAY(DataTypes.TEXT),
                 allowNull: true,
             },
             status: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.ENUM('Pending', 'Approved'),
                 allowNull: false,
-                defaultValue: 1
             },
             user_id: {
                 type: DataTypes.UUID,
@@ -39,15 +38,23 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: 'cascade',
                 onDelete: 'cascade'
             },
-            ingredients : DataTypes.ARRAY(DataTypes.STRING),
+            steps: DataTypes.ARRAY(DataTypes.JSONB),
+            ingredients : DataTypes.ARRAY(DataTypes.JSONB),
+            ingredients_name : DataTypes.ARRAY(DataTypes.STRING),
             hashtags : DataTypes.ARRAY(DataTypes.STRING),
             categories: DataTypes.ARRAY(DataTypes.STRING),
-            steps: DataTypes.ARRAY(DataTypes.JSONB),
         },
         {
             tableName: "recipe",
             underscored: true,
         }
     );
+
+    Recipe.associate = (models) => {
+        Recipe.author = Recipe.belongsTo(models.User, {
+          foreignKey: "user_id",
+          as: "author"
+        });
+      };
     return Recipe;
 };
