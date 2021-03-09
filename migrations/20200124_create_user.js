@@ -30,6 +30,7 @@ module.exports = {
         status: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            // 0: unactive , 1:active
         },
         ref_token: {
             type: DataTypes.STRING,

@@ -8,7 +8,7 @@ async function getAll() {
   });
 }
 
-async function filter({ search, limit, categories, hashtag }) {
+async function filter({ search, limit, categories, hashtag, ingredients }) {
   console.log({categories})
   let extraWhereCondition = {};
   if (hashtag) {
@@ -31,17 +31,32 @@ async function filter({ search, limit, categories, hashtag }) {
       }
     }
   }
+
+  if (ingredients)  {
+    console.log('------ ingredients --------', ingredients)
+    if (Array.isArray(ingredients)) {
+      extraWhereCondition = {
+        ...extraWhereCondition,
+        ingredients_name: { [Op.overlap]: ingredients }
+      }
+    } else {
+      extraWhereCondition = {
+        ...extraWhereCondition,
+        ingredients_name: { [Op.overlap]: [ingredients] }
+      }
+    }
+  }
+
   if (search) {
     extraWhereCondition = {
       ...extraWhereCondition,
+              // { '$author.name$': { [Op.iLike]: `%${search}%` } },
       [Op.or] : [
-        { title: { [Op.iLike]: `%${search}%` }},
-        { '$author.name$': { [Op.iLike]: `%${search}%` } },
         models.sequelize.where(
           models.sequelize.fn('similarity',
               models.sequelize.col("title"),
               `${search}`), {
-                  [Op.gte]: '0.1'
+                  [Op.gte]:'0.1'
               }),
 
       ]

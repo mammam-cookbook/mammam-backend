@@ -26,7 +26,33 @@ async function getNameById(id){
 }
 
 async function getById(id) {
-  return await User.findByPk(id);
+  return await User.findOne({
+    where: {
+      id
+    },
+    include: [
+      {
+        model: models.Follow,
+        as: 'follower',
+        include: [
+          { 
+            model: models.User,
+            as: 'user'
+          }
+        ]
+      },
+      {
+        model: models.Follow,
+        as: 'following',
+        include: [
+          { 
+            model: models.User,
+            as: 'following'
+          }
+        ]
+      }
+    ]
+  });
 }
 async function getByEmail(email) {
   return await User.findOne({

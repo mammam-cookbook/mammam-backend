@@ -52,5 +52,17 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true,
         }
     );
+
+    User.associate = (models) => {
+        User.following = User.hasMany(models.Follow, {
+          foreignKey: "user_id",
+          as: "following"
+        });
+        User.follower = User.hasMany(models.Follow, {
+            foreignKey: "following_id",
+            as: "follower"
+          });
+      };
+
     return User;
 };
