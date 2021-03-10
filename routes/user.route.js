@@ -27,7 +27,6 @@ router.post("/", async function (req, res) {
   }
 });
 
-
 router.get("/:id",async (req, res) => {
   const user = await userRepo.getById(req.params.id);
   if (!user) {
@@ -67,4 +66,5 @@ router.post("/:id/unfollow/:following_id", async (req, res) => {
     throw new Error(err);
   }
 })
+
 module.exports = router;

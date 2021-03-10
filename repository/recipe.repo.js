@@ -8,9 +8,11 @@ async function getAll() {
   });
 }
 
-async function filter({ search, limit, categories, hashtag, ingredients }) {
-  console.log({categories})
+async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder }) {
+  let order = [];
   let extraWhereCondition = {};
+
+  // where condition
   if (hashtag) {
     return models.Recipe.findAndCountAll({
       where: {
@@ -22,18 +24,17 @@ async function filter({ search, limit, categories, hashtag, ingredients }) {
     if (Array.isArray(categories)) {
       extraWhereCondition = {
         ...extraWhereCondition,
-        categories: { [Op.overlap]: categories }
+        categories: { [Op.contains]: categories }
       }
     } else {
       extraWhereCondition = {
         ...extraWhereCondition,
-        categories: { [Op.overlap]: [categories] }
+        categories: { [Op.contains]: [categories] }
       }
     }
   }
 
   if (ingredients)  {
-    console.log('------ ingredients --------', ingredients)
     if (Array.isArray(ingredients)) {
       extraWhereCondition = {
         ...extraWhereCondition,
@@ -50,18 +51,30 @@ async function filter({ search, limit, categories, hashtag, ingredients }) {
   if (search) {
     extraWhereCondition = {
       ...extraWhereCondition,
-              // { '$author.name$': { [Op.iLike]: `%${search}%` } },
       [Op.or] : [
+        { title: { [Op.iLike]: `%${search}%` }},
         models.sequelize.where(
           models.sequelize.fn('similarity',
               models.sequelize.col("title"),
               `${search}`), {
                   [Op.gte]:'0.1'
               }),
-
+        models.sequelize.where(
+          models.sequelize.fn('similarity',
+              models.sequelize.col("author.name"),
+              `${search}`), {
+                  [Op.gte]:'0.1'
+              }),
       ]
     }
   }
+
+  // order condition
+  if (createdOrder) {
+    order.push(['created_at', createdOrder])
+  }
+
+  // query
   return models.Recipe.findAndCountAll({
     include: [
       {
@@ -71,7 +84,10 @@ async function filter({ search, limit, categories, hashtag, ingredients }) {
     ],
     where: {
       ...extraWhereCondition
-    }
+    },
+    order,
+    limit,
+    offset
   })
 }
 

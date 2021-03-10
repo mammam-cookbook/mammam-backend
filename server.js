@@ -18,6 +18,7 @@ app.use(bodyParser.json({ limit: "5mb" }));
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
 app.use("/api/recipe", require("./routes/recipe.route"));
+app.use("/api/comment", require("./routes/comment.route"));
 
 app.use(function (req, res, next) {
   console.log('------ req.body -------', req.body);
