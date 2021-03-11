@@ -20,7 +20,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
       }
     })
   }
-  if (categories)  {
+  if (categories) {
     if (Array.isArray(categories)) {
       extraWhereCondition = {
         ...extraWhereCondition,
@@ -34,7 +34,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     }
   }
 
-  if (ingredients)  {
+  if (ingredients) {
     if (Array.isArray(ingredients)) {
       extraWhereCondition = {
         ...extraWhereCondition,
@@ -51,20 +51,20 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
   if (search) {
     extraWhereCondition = {
       ...extraWhereCondition,
-      [Op.or] : [
-        { title: { [Op.iLike]: `%${search}%` }},
+      [Op.or]: [
+        { title: { [Op.iLike]: `%${search}%` } },
         models.sequelize.where(
           models.sequelize.fn('similarity',
-              models.sequelize.col("title"),
-              `${search}`), {
-                  [Op.gte]:'0.1'
-              }),
+            models.sequelize.col("title"),
+            `${search}`), {
+          [Op.gte]: '0.1'
+        }),
         models.sequelize.where(
           models.sequelize.fn('similarity',
-              models.sequelize.col("author.name"),
-              `${search}`), {
-                  [Op.gte]:'0.1'
-              }),
+            models.sequelize.col("author.name"),
+            `${search}`), {
+          [Op.gte]: '0.1'
+        }),
       ]
     }
   }
@@ -92,7 +92,42 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
 }
 
 async function getById(id) {
-  return await Recipe.findByPk(id);
+  return await Recipe.findOne({
+    where: {
+      id
+    },
+    include: [
+      {
+        model: models.User,
+        as: 'author',
+        attributes: ['id', 'name', 'avatar_url', 'email']
+      },
+      {
+        model: models.Comment,
+        as: 'comments',
+        attributes: ['id', 'images', 'content'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          },
+          {
+            model: models.Comment,
+            as: 'parentComment',
+            attributes: ['id', 'images', 'content'],
+            include: [
+              {
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name', 'avatar_url', 'email']
+              },
+            ]
+          }
+        ]
+      }
+    ]
+  });
 }
 
 async function create(recipe) {
@@ -100,19 +135,29 @@ async function create(recipe) {
 }
 
 async function update(id, recipe) {
-  return  await Recipe.update(recipe, {
+  return await Recipe.update(recipe, {
     where: {
       id: id,
     },
   });
 }
 
-async function remove(id) {
-  return await Recipe.destroy({
-    where: {
-      id: id,
-    },
-  });
+async function remove(id, user_id) {
+  const recipe = await getById(id);
+  if (!recipe) {
+      throw new Error('Recipe not found!')
+  } else {
+    const author = recipe.user_id;
+    if (author !== user_id) {
+      throw new Error('User has no permission!')
+    } else {
+      return await Recipe.destroy({
+        where: {
+          id: id,
+        },
+      });
+    }
+  }
 }
 
 module.exports = {

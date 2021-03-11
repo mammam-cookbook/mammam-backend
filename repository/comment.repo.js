@@ -8,21 +8,31 @@ async function getAll() {
     });
 }
 
-async function filter({ limit = 10, offset = 0, recipeId }) {
+async function query({ limit = 10, offset = 0, recipe_id }) {
     // query
     return models.Comment.findAndCountAll({
         include: [
             {
-                model: models.Recipe,
-                as: 'recipe'
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name', 'avatar_url', 'email']
             },
             {
-                model: models.User,
-                as: 'author'
+                model: models.Comment,
+                as: 'parentComment',
+                attributes: ['id','images','content'],
+                include: [
+                    {
+                        model: models.User,
+                        as: 'author',
+                        attributes: ['id', 'name', 'avatar_url', 'email']
+                    },
+                ]
             }
         ],
+        attributes: ['id','images','content'],
         where: {
-            recipe_id: recipeId
+            recipe_id
         },
         order: [
             ['created_at', 'ASC']
@@ -36,24 +46,34 @@ async function getById(id) {
     return await Comment.findByPk(id);
 }
 
-async function create(Comment) {
-    return Comment.create(Comment);
+async function create(comment) {
+    return Comment.create(comment);
 }
 
-async function update(id, Comment) {
-    return await Comment.update(Comment, {
+async function update(id, comment) {
+    return await Comment.update(comment, {
         where: {
             id: id,
         },
     });
 }
 
-async function remove(id) {
-    return await Comment.destroy({
-        where: {
+async function remove(id, user_id) {
+    const comment = await getById(id);
+    if (!comment) {
+        throw new Error('Recipe not found!')
+    } else {
+      const author = comment.user_id;
+      if (author !== user_id) {
+        throw new Error('User has no permission!')
+      } else {
+        return await Comment.destroy({
+          where: {
             id: id,
-        },
-    });
+          },
+        });
+      }
+    }
 }
 
 module.exports = {
@@ -62,5 +82,5 @@ module.exports = {
     create,
     update,
     remove,
-    filter
+    query
 };
