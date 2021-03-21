@@ -42,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
             ingredients : DataTypes.ARRAY(DataTypes.JSONB),
             ingredients_name : DataTypes.ARRAY(DataTypes.STRING),
             hashtags : DataTypes.ARRAY(DataTypes.STRING),
-            categories: DataTypes.ARRAY(DataTypes.STRING),
         },
         {
             tableName: "recipe",

@@ -35,6 +35,7 @@
     "pg-search-sequelize": "^0.0.10",
     "rand-token": "^1.0.1",
     "redis": "^3.0.2",
-    "sequelize": "^6.4.0"
+    "sequelize": "^6.4.0",
+    "socket.io": "^4.0.0"
   }
 }
