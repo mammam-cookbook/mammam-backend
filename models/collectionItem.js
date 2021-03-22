@@ -33,6 +33,12 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true,
         }
     );
-
+    
+    CollectionItem.associate = (models) => {
+        CollectionItem.recipe = CollectionItem.belongsTo(models.Recipe, {
+            foreignKey: "recipe_id",
+            as: "recipe"
+        });
+    };
     return CollectionItem;
 };

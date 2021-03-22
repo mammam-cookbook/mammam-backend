@@ -1,190 +1,116 @@
 const models = require("../models");
-let Recipe = models.Recipe;
 let Collection = models.Collection;
-const _ = require('lodash');
-const bcrypt = require("bcryptjs");
-const { Op } = require('sequelize')
-async function getAll() {
-  return await Recipe.findAndCountAll({
-  });
-}
+let CollectionItem = models.CollectionItem;
+let Recipe = models.Recipe;
 
-async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder }) {
-  let order = [];
-  let extraWhereCondition = {};
-
-  // where condition
-  if (hashtag) {
-    return models.Recipe.findAndCountAll({
-      where: {
-        hashtags: { [Op.contains]: [hashtag] }
-      }
-    })
-  }
-  if (categories) {
-    if (Array.isArray(categories)) {
-      extraWhereCondition = {
-        ...extraWhereCondition,
-        categories: { [Op.contains]: categories }
-      }
-    } else {
-      extraWhereCondition = {
-        ...extraWhereCondition,
-        categories: { [Op.contains]: [categories] }
-      }
+async function getAll({ user_id }) {
+  let where;
+    if (user_id) {
+      where = { user_id }
     }
-  }
-
-  if (ingredients) {
-    if (Array.isArray(ingredients)) {
-      extraWhereCondition = {
-        ...extraWhereCondition,
-        ingredients_name: { [Op.overlap]: ingredients }
-      }
-    } else {
-      extraWhereCondition = {
-        ...extraWhereCondition,
-        ingredients_name: { [Op.overlap]: [ingredients] }
-      }
-    }
-  }
-
-  if (search) {
-    extraWhereCondition = {
-      ...extraWhereCondition,
-      [Op.or]: [
-        { title: { [Op.iLike]: `%${search}%` } },
-        models.sequelize.where(
-          models.sequelize.fn('similarity',
-            models.sequelize.col("title"),
-            `${search}`), {
-          [Op.gte]: '0.1'
-        }),
-        models.sequelize.where(
-          models.sequelize.fn('similarity',
-            models.sequelize.col("author.name"),
-            `${search}`), {
-          [Op.gte]: '0.1'
-        }),
-      ]
-    }
-  }
-
-  // order condition
-  if (createdOrder) {
-    order.push(['created_at', createdOrder])
-  }
-
-  // query
-  return models.Recipe.findAndCountAll({
-    include: [
-      {
-        model: models.User,
-        as: 'author'
-      }
-    ],
-    where: {
-      ...extraWhereCondition
-    },
-    order,
-    limit,
-    offset
-  })
+    return await Collection.findAll({ where });
 }
 
 async function getById(id) {
-  return await Recipe.findOne({
-    where: {
-      id
-    },
-    include: [
-      {
-        model: models.User,
-        as: 'author',
-        attributes: ['id', 'name', 'avatar_url', 'email']
+    return await Collection.findOne({
+      where: {
+        id
       },
-      {
-        model: models.Comment,
-        as: 'comments',
-        attributes: ['id', 'images', 'content'],
-        include: [
-          {
-            model: models.User,
-            as: 'author',
-            attributes: ['id', 'name', 'avatar_url', 'email']
-          },
-          {
-            model: models.Comment,
-            as: 'parentComment',
-            attributes: ['id', 'images', 'content'],
-            include: [
-              {
-                model: models.User,
-                as: 'author',
-                attributes: ['id', 'name', 'avatar_url', 'email']
-              },
-            ]
-          }
-        ]
-      }
-    ]
-  });
+      attributes: ['id', 'name'],
+      include: [
+        {
+          model: models.CollectionItem,
+          as: 'recipes',
+          attributes: ['id', 'recipe_id'],
+          include: [
+            {
+              model: models.Recipe,
+              as: 'recipe'
+            }
+          ]
+        }
+      ]
+    });
 }
 
-async function create(recipe) {
-  return Recipe.create(recipe);
+async function create(collection) {
+    return Collection.create(collection);
 }
 
-async function update(id, recipe) {
-  return await Recipe.update(recipe, {
-    where: {
-      id: id,
-    },
-  });
+async function update(id, collection) {
+    return await Collection.update(collection, {
+        where: {
+            id: id,
+        },
+    });
 }
 
 async function remove(id, user_id) {
-  const recipe = await getById(id);
-  if (!recipe) {
-      throw new Error('Recipe not found!')
-  } else {
-    const author = recipe.user_id;
-    if (author !== user_id) {
-      throw new Error('User has no permission!')
+    const collection = await getById(id);
+    if (!collection) {
+        throw new Error('Collection not found!')
     } else {
-      return await Recipe.destroy({
-        where: {
-          id: id,
-        },
-      });
+        return await Collection.destroy({
+          where: {
+            id: id,
+          },
+        });
     }
+}
+
+async function addRecipeToCollection({ recipe_id, collection_id}) {
+  const recipe = await Recipe.findOne({ where: { id: recipe_id }});
+  const collection = await Collection.findOne({ where: { id: collection_id }});
+  if (!recipe) {
+    throw new Error('Recipe not found')
+  }
+
+  if (!collection) {
+    throw new Error('Collection not found')
+  }
+
+  const collectionItem = await CollectionItem.findOne({ where : { recipe_id, collection_id}})
+  console.log('------ collection iutem ---------', collectionItem)
+  if (collectionItem) {
+    throw new Error('Recipe already exist in collection')
+  }
+  return CollectionItem.create({ recipe_id, collection_id });
+}
+
+async function removeRecipeFromCollection({ recipe_id, collection_id}) {
+  try {
+    const foundRecipe = await CollectionItem.findOne({
+      where: {
+        recipe_id,
+        collection_id
+      }
+    })
+    if (!foundRecipe) {
+      throw new Error('Not Found Collection Item')
+    }
+
+    const collectionItem = await CollectionItem.findOne({ where : { recipe_id, collection_id}})
+    if (collectionItem) {
+      return CollectionItem.destroy({
+        where: {
+          collection_id,
+          recipe_id
+        }
+      })
+    } else {
+      throw new Error('Recipe dose not exist in collection')
+    }
+  } catch (error) {
+    //
   }
 }
 
-async function getUserCollection(user_id) {
-    const collections = await Collection.findAll({
-        user_id
-    })
-    return res.status(400).json({
-        collections
-    })
-}
-
-async function createCollection(collection) {
-    try {
-        const collection = await Collection.create(collection);
-        return res.status(200)
-    } catch (error) {
-        
-    }
-}
-
 module.exports = {
-  getAll,
-  getById,
-  create,
-  update,
-  remove,
-  filter,
-  getUserCollection
+    getAll,
+    getById,
+    create,
+    update,
+    remove,
+    addRecipeToCollection,
+    removeRecipeFromCollection
 };
