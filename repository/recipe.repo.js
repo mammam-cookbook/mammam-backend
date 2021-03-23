@@ -3,8 +3,34 @@ let Recipe = models.Recipe;
 const _ = require('lodash');
 const bcrypt = require("bcryptjs");
 const { Op } = require('sequelize')
-async function getAll() {
+async function getAll(type) {
+  const user_id = req.user.id;
+  let where;
+  if (type === 'recommend') {
+    // 
+  } else if (type === 'following') {
+    where = {
+      include: [
+        {
+          model: models.User,
+          as: 'author',
+          include: [
+            {
+              model: models.Follow,
+              as: 'follower',
+              where: {
+                user_id
+              }
+            }
+          ]
+        }
+      ]
+    }
+  } else if (type === 'highlights') {
+    // 
+  }
   return await Recipe.findAndCountAll({
+    where
   });
 }
 

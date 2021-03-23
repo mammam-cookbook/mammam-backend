@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const recipeRepo = require("../repository/recipe.repo");
+const menuRepo = require("../repository/menu.repo");
+
 const authorize = require('../middlewares/authorize');
-const recipeViewsRepo = require("../repository/recipeViews.repo");
 
 router.get("/", async function (req, res) {
   const result = await recipeRepo.filter(req.query);
@@ -12,33 +13,35 @@ router.get("/", async function (req, res) {
   }
 });
 
-router.post("/",authorize, async function (req, res) {
-  const recipe = req.body;
-  Object.assign(recipe, { user_id : req.user.id})
-  const createdRecipe = await recipeRepo.create(recipe);
-  if (createdRecipe) {
-    res.status(200).json({
-      result: 1,
-      recipe: createdRecipe
-    });
-  }
+router.post("/",authorize,async function (req, res) {
+    try {
+        const menu = req.body;
+        Object.assign(menu, { user_id : req.user.id})
+        const createdMenu = await menuRepo.create(menu);
+        if (createdMenu) {
+          res.status(200).json({
+            result: 1,
+            menu: createdMenu
+          });
+        }
+    } catch (error) {
+        res.status(400).json({
+            result: 0,
+            message: error.message
+        })
+    }
 });
 
+
 router.get("/:id",async (req, res) => {
-  const { user } = req;
   const recipe = await recipeRepo.getById(req.params.id);
   if (!recipe) {
     return res.status(400).json({
       message: "Recipe not found!"
     })
-  }
-
-  if (user.id !== recipe.user_id && (user.role !== 'admin')) {
-    recipeViewsRepo.countView(recipe.id)
-  }
-
+  }   
   return res.status(200).json({
-    recipe: {...recipe, views: recipeViewsRepo.getViewsOfRecipe(recipe.id)}
+    recipe
   })
 })
 
