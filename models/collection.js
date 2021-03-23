@@ -28,5 +28,16 @@ module.exports = (sequelize, DataTypes) => {
         }
     );
 
+    Collection.associate = (models) => {
+        Collection.user = Collection.belongsTo(models.User, {
+            foreignKey: "user_id",
+            as: "user"
+        });
+        Collection.recipes = Collection.hasMany(models.CollectionItem, {
+            foreignKey: "collection_id",
+            as: "recipes"
+        });
+    };
+
     return Collection;
 };

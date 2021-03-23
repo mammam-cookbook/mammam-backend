@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
             },
             parent_category_id: {
                 type: DataTypes.UUID,
-                allowNull: false,
                 references: {
                     model: 'category',
                     key: 'id'
@@ -31,6 +30,13 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true,
         }
     );
+
+    Catgegory.associate = (models) => {
+        Catgegory.parentCategory = Catgegory.belongsTo(models.Category, {
+            foreignKey: "parent_category_id",
+            as: "parentCategory"
+        });
+    };
 
     return Catgegory;
 };
