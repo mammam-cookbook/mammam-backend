@@ -7,17 +7,17 @@
     "dialect": "postgres"
   },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "aecqhbxhnzxrhx",
+    "password": "85caca40a4034646d279f4b7603781bc0ad6e6b2992d2b2bea0b6b960ea1091c",
+    "database": "degip2g3hcab0q",
+    "host": "ec2-52-7-115-250.compute-1.amazonaws.com",
+    "dialect": "postgres"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "zxuqbrgygexywd",
+    "password": "1cdf5e9a5ed9f3b812e190b82b1a10777f818f99d47a7cefeb1bd9558494633e",
+    "database": "d7vk4j1r58h73p",
+    "host": "ec2-52-1-115-6.compute-1.amazonaws.com",
+    "dialect": "postgres"
   }
 }
