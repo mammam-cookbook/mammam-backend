@@ -3,12 +3,37 @@ const categoryRepo = require("../repository/category.repo");
 const authorize = require('../middlewares/authorize');
 const permitRole = require("../middlewares/permitRole");
 
+
+const convertCategoryArrayToTreeArray = (arr) => {
+    const hashObj = {};
+    arr.forEach((item) => {
+      hashObj[item.id] = item;
+      item.dataValues.childrenCategories = [];
+    });
+  
+    const result = [];
+    arr.forEach((item) => {
+      if (item.dataValues.parent_category_id !== null) {
+        hashObj[item.parent_category_id].dataValues.childrenCategories.push(item);
+      } else {
+        result.push(item);
+      }
+    });
+  
+    return result;
+  };
+
 router.get("/", async function (req, res) {
     const categories = await categoryRepo.getAll();
+    const countResult = categories.count;
+    const categoriesResult = convertCategoryArrayToTreeArray(categories.rows);
     if (categories) {
         res.status(200).json({
             result: 1,
-            categories
+            categories: {
+                countResult,
+                categoriesResult
+            }
         });
     }
 });

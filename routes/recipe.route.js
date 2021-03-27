@@ -1,6 +1,27 @@
 const router = require("express").Router();
 const recipeRepo = require("../repository/recipe.repo");
+const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
+const recipeViewsRepo = require("../repository/recipeViews.repo");
+
+const convertCommentArrayToTreeArray = (arr) => {
+  const hashObj = {};
+  arr.forEach((item) => {
+    hashObj[item.id] = item;
+    item.dataValues.childrenComments = [];
+  });
+
+  const result = [];
+  arr.forEach((item) => {
+    if (item.dataValues.parent_comment_id !== null) {
+      hashObj[item.parent_comment_id].dataValues.childrenComments.push(item);
+    } else {
+      result.push(item);
+    }
+  });
+
+  return result;
+};
 
 router.get("/", async function (req, res) {
   const result = await recipeRepo.filter(req.query);
@@ -23,16 +44,23 @@ router.post("/",authorize, async function (req, res) {
   }
 });
 
-
 router.get("/:id",async (req, res) => {
+  const { user } = req;
   const recipe = await recipeRepo.getById(req.params.id);
   if (!recipe) {
     return res.status(400).json({
       message: "Recipe not found!"
     })
-  }   
+  }
+
+  if (_.get(user, 'id') !== recipe.user_id && (_.get(user, 'role') !== 'admin')) {
+    recipeViewsRepo.countView(recipe.id)
+  }
+
+  const recipeViews = await recipeViewsRepo.getViewsOfRecipe(recipe.id);
+  const comments = convertCommentArrayToTreeArray(recipe.comments);
   return res.status(200).json({
-    recipe
+    result: {...recipe.dataValues, comments, views: recipeViews}
   })
 })
 

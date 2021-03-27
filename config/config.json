@@ -4,13 +4,7 @@
     "password": "postgres",
     "database": "mammam",
     "host": "127.0.0.1",
-    "dialect": "postgres",
-    "dialectOptions":{
-      "ssl": {
-        "require":true,
-        "rejectUnauthorized": false
-      }      
-    }
+    "dialect": "postgres"
   },
   "test": {
     "username": "aecqhbxhnzxrhx",
