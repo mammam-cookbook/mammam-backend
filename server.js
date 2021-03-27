@@ -65,6 +65,8 @@ app.use("/api/recipe", require("./routes/recipe.route"));
 app.use("/api/comment", require("./routes/comment.route"));
 app.use("/api/collection", require("./routes/collection.route"));
 app.use("/api/category", require("./routes/category.route"));
+app.use("/api/shopinglist", require("./routes/shoping.route"));
+app.use("/api/menu", require("./routes/menu.route"));
 
 app.use(function (req, res, next) {
   console.log('------ req.body -------', req.body);

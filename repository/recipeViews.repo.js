@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 const e = require("express");
 
 async function countView(recipe_id) {
-    const recipe = await Recipe.findOne({ where: { recipe_id }});
+    const recipe = await Recipe.findOne({ where: { id: recipe_id }});
     if (!recipe) {
         throw Error('Recipe not found')
     }
@@ -30,7 +30,7 @@ async function countView(recipe_id) {
 }
 
 async function getViewsOfRecipe(recipe_id) {
-    const recipe = await Recipe.findOne({ where: { recipe_id }});
+    const recipe = await Recipe.findOne({ where: { id: recipe_id }});
     if (!recipe) {
         throw Error('Recipe not found')
     }

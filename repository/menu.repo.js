@@ -6,24 +6,24 @@ const bcrypt = require("bcryptjs");
 const { Op } = require('sequelize');
 
 async function getRecipesBetweenTwoDates(start, end, user_id) {
+    console.log({ start, end})
     return Menu.findAll({
         where: {
             date: {
-                [Op.and]: {
-                    $gte: start,
-                    $lte: end
-                }
+                [Op.between]: [start, end]
             },
             user_id
-        }
+        },
+        include: [
+          {
+            model: models.Recipe,
+            as: 'recipe'
+          }
+        ]
     })
 }
 
 async function create(menu) {
-  const { user_id } = menu;
-  if (user_id !== req.user.id) {
-    throw new Error('User has no permission!')
-  }
   return Menu.create(menu);
 }
 
@@ -41,6 +41,17 @@ async function getById(id) {
             id
         }
     })
+}
+
+async function findRecipeInMenu(user_id, recipe_id, date, session) {
+  return Menu.findOne({
+    where: {
+      user_id,
+      recipe_id,
+      date,
+      session
+    }
+  })
 }
 
 async function remove(id, user_id) {
@@ -66,5 +77,6 @@ module.exports = {
   create,
   update,
   remove,
-  getRecipesBetweenTwoDates
+  getRecipesBetweenTwoDates,
+  findRecipeInMenu
 };

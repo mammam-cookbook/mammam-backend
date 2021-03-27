@@ -1,7 +1,27 @@
 const router = require("express").Router();
 const recipeRepo = require("../repository/recipe.repo");
+const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
+
+const convertCommentArrayToTreeArray = (arr) => {
+  const hashObj = {};
+  arr.forEach((item) => {
+    hashObj[item.id] = item;
+    item.dataValues.childrenComments = [];
+  });
+
+  const result = [];
+  arr.forEach((item) => {
+    if (item.dataValues.parent_comment_id !== null) {
+      hashObj[item.parent_comment_id].dataValues.childrenComments.push(item);
+    } else {
+      result.push(item);
+    }
+  });
+
+  return result;
+};
 
 router.get("/", async function (req, res) {
   const result = await recipeRepo.filter(req.query);
@@ -33,12 +53,14 @@ router.get("/:id",async (req, res) => {
     })
   }
 
-  if (user.id !== recipe.user_id && (user.role !== 'admin')) {
+  if (_.get(user, 'id') !== recipe.user_id && (_.get(user, 'role') !== 'admin')) {
     recipeViewsRepo.countView(recipe.id)
   }
 
+  const recipeViews = await recipeViewsRepo.getViewsOfRecipe(recipe.id);
+  const comments = convertCommentArrayToTreeArray(recipe.comments);
   return res.status(200).json({
-    recipe: {...recipe, views: recipeViewsRepo.getViewsOfRecipe(recipe.id)}
+    result: {...recipe.dataValues, comments, views: recipeViews}
   })
 })
 

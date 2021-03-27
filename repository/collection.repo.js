@@ -25,7 +25,7 @@ async function getById(id) {
           include: [
             {
               model: models.Recipe,
-              as: 'recipe'
+              as: 'recipe',
             }
           ]
         }

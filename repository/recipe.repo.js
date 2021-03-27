@@ -105,7 +105,8 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     include: [
       {
         model: models.User,
-        as: 'author'
+        as: 'author',
+        attributes: ['id', 'name', 'avatar_url', 'email']
       }
     ],
     where: {
@@ -126,29 +127,19 @@ async function getById(id) {
       {
         model: models.User,
         as: 'author',
-        attributes: ['id', 'name', 'avatar_url', 'email']
+        attributes: ['id', 'name', 'avatar_url', 'email'],
+        raw: true
       },
       {
         model: models.Comment,
         as: 'comments',
-        attributes: ['id', 'images', 'content'],
+        raw: true,
+        attributes: ['id', 'images', 'content', 'parent_comment_id'],
         include: [
           {
             model: models.User,
             as: 'author',
             attributes: ['id', 'name', 'avatar_url', 'email']
-          },
-          {
-            model: models.Comment,
-            as: 'parentComment',
-            attributes: ['id', 'images', 'content'],
-            include: [
-              {
-                model: models.User,
-                as: 'author',
-                attributes: ['id', 'name', 'avatar_url', 'email']
-              },
-            ]
           }
         ]
       }
