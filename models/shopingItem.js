@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
           foreignKey: "shoping_list_id",
           as: "shopingList"
         });
+        ShopingItem.recipe = ShopingItem.belongsTo(models.Recipe, {
+            foreignKey: "recipe_id",
+            as: "recipe"
+          });
       };
 
     return ShopingItem;

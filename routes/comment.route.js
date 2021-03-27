@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const commentRepo = require("../repository/comment.repo");
 const authorize = require('../middlewares/authorize');
+const permitRole = require("../middlewares/permitRole");
 
 router.get("/", async function (req, res) {
   const result = await commentRepo.query(req.query);
@@ -10,8 +11,8 @@ router.get("/", async function (req, res) {
     })
   }
 });
-
-router.post("/",authorize, async function (req, res) {
+// user, admin, mod
+router.post("/",authorize, permitRole('user'), async function (req, res) {
   const comment = req.body;
   Object.assign(comment, { user_id : req.user.id})
   const createdComment = await commentRepo.create(comment);
