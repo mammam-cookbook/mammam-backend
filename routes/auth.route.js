@@ -28,10 +28,10 @@ router.post("/", async function (req, res) {
     });
     console.log({ token });
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role } = findUser;
+    const { id, name, email, role, avatar_url } = findUser;
     return res.status(200).json({
       token,
-      user: { id, name, email, role },
+      user: { id, name, email, role, avatar_url },
     });
   }
 });
