@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
                     key: 'id'
                 },
                 onUpdate: 'cascade',
-                onDelete: 'cascade'
+                onDelete: 'cascade',
+                unique: 'unique_cmt'
             },
             recipe_id: {
                 type: DataTypes.UUID,
@@ -23,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
                     key: 'id'
                 },
                 onUpdate: 'cascade',
-                onDelete: 'cascade'
+                onDelete: 'cascade',
+                unique: 'unique_cmt'
             },
             react: {
                 type: DataTypes.ENUM('yum', 'yuck', 'easy peasy', 'tough nut'),
@@ -35,6 +37,17 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true,
         }
     );
+
+    Reaction.associate = (models) => {
+        Reaction.author = Reaction.belongsTo(models.User, {
+            foreignKey: "user_id",
+            as: "author"
+        });
+        Reaction.recipe = Reaction.belongsTo(models.Recipe, {
+            foreignKey: "recipe_id",
+            as: "recipe"
+        });
+    };
 
     return Reaction;
 };

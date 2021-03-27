@@ -18,15 +18,15 @@ services:
   #   volumes:
   #     - .src:/app/src
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    expose:
-      - "6379"
-    volumes:
-      - .docker/redis:/data
-    restart: always
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
+  #   expose:
+  #     - "6379"
+  #   volumes:
+  #     - .docker/redis:/data
+  #   restart: always
 
   postgres:
     image: postgres
