@@ -7,7 +7,7 @@ const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 let SearchModel = require('pg-search-sequelize');
 const env = process.env.NODE_ENV || 'development';
-const config = {
+let config = {
   username: process.env.PG_USER || "postgres",
   password: process.env.PG_PWD || "postgres",
   database: process.env.PG_DB || "mammam",
