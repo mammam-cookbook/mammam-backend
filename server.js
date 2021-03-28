@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 require("dotenv").config();
+console.log({ env: process.env })
 //Log request
 const morgan = require("morgan");
 app.use(morgan("dev"));
