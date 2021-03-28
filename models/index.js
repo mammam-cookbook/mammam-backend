@@ -1,12 +1,28 @@
 'use strict';
 
 const fs = require('fs');
+require("dotenv").config();
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 let SearchModel = require('pg-search-sequelize');
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const config = {
+  username: process.env.PG_USER || "postgres",
+  password: process.env.PG_PWD || "postgres",
+  database: process.env.PG_DB || "mammam",
+  host: process.env.PG_HOST || "127.0.0.1",
+  dialect: "postgres"
+}// require(__dirname + '/../config/config.json')[env];
+
+if (env !== "development") {
+  config = {...config, dialectOptions:{
+    ssl: {
+      require:true,
+      rejectUnauthorized: false
+    }      
+  }}
+}
 const db = {};
 
 let sequelize;
