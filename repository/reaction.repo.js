@@ -35,7 +35,36 @@ async function getById(id) {
 }
 
 async function create(reaction) {
-    return Reaction.create(reaction);
+    //return Reaction.create(reaction);
+    const [created_react, created] = await Reaction.findOrCreate({
+        where: { user_id: reaction.user_id, recipe_id : reaction.recipe_id },
+        defaults: {
+            react: reaction.react
+        }
+    });
+    if (created) { //user has yet to react to this recipe
+        return created_react;
+    }
+    else //user has reacted to this recipe
+    {
+        if(created_react.react === reaction.react) //this reaction exists, get rid of it
+        {
+            return await Reaction.destroy({
+                where: {
+                    id: created_react.id,
+                },
+            });
+        }
+        else //this reaction doesnt exist, update it
+        {
+            return Reaction.update({react: reaction.react},{
+                where: {
+                    id: created_react.id,
+                },
+            }
+            );
+        }
+    }
 }
 
 async function update(id, reaction) {
@@ -47,21 +76,21 @@ async function update(id, reaction) {
 }
 
 async function remove(id, user_id) {
-    const reaction = await getById(id);
-    if (!reaction) {
-        throw new Error('Reaction not found!')
-    } else {
-      const author = reaction.user_id;
-      if (author !== user_id) {
-        throw new Error('User has no permission!')
-      } else {
-        return await Reaction.destroy({
-          where: {
-            id: id,
-          },
-        });
-      }
-    }
+    // const reaction = await getById(id);
+    // if (!reaction) {
+    //     throw new Error('Reaction not found!')
+    // } else {
+    //   const author = reaction.user_id;
+    //   if (author !== user_id) {
+    //     throw new Error('User has no permission!')
+    //   } else {
+    //     return await Reaction.destroy({
+    //       where: {
+    //         id: id,
+    //       },
+    //     });
+    //   }
+    // }
 }
 
 module.exports = {

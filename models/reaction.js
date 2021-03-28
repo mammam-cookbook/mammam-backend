@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
             user_id: {
                 type: DataTypes.UUID,
                 references: {
-                    model: 'category',
+                    model: 'user',
                     key: 'id'
                 },
                 onUpdate: 'cascade',
@@ -37,17 +37,6 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true,
         }
     );
-
-    Reaction.associate = (models) => {
-        Reaction.author = Reaction.belongsTo(models.User, {
-            foreignKey: "user_id",
-            as: "author"
-        });
-        Reaction.recipe = Reaction.belongsTo(models.Recipe, {
-            foreignKey: "recipe_id",
-            as: "recipe"
-        });
-    };
 
     return Reaction;
 };
