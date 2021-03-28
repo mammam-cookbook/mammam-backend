@@ -40,7 +40,7 @@ router.get("/", async function (req, res) {
 
 router.put("/:id",
     authorize,
-    permitRole(['mode', 'admin']),
+    permitRole('mod', 'admin'),
     (req, res) => {
         const { id } = req.params;
         const category = req.body;
@@ -58,7 +58,7 @@ router.put("/:id",
     })
 router.post("/",
     authorize,
-    permitRole(['user', 'admin']),
+    permitRole('user', 'admin'),
     async function (req, res) {
         const category = req.body;
         Object.assign(category, { user_id: req.user.id })

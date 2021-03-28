@@ -3,6 +3,7 @@ const recipeRepo = require("../repository/recipe.repo");
 const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
+const categoryRecipeRepo = require("../repository/categoryRecipe.repo");
 
 const convertCommentArrayToTreeArray = (arr) => {
   const hashObj = {};
@@ -34,13 +35,23 @@ router.get("/", async function (req, res) {
 
 router.post("/",authorize, async function (req, res) {
   const recipe = req.body;
+  const { categories } = recipe;
+  console.log({ categories })
   Object.assign(recipe, { user_id : req.user.id})
   const createdRecipe = await recipeRepo.create(recipe);
   if (createdRecipe) {
-    res.status(200).json({
-      result: 1,
-      recipe: createdRecipe
-    });
+    try {
+      await Promise.all( await categories.map(category => categoryRecipeRepo.create({ recipe_id: createdRecipe.id, category_id: category })));
+      res.status(200).json({
+        result: 1,
+        recipe: createdRecipe
+      });
+    } catch (error) {
+      res.status(400).json({
+        result: 0,
+        message: error.message
+      })
+    }
   }
 });
 

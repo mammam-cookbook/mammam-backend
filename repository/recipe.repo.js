@@ -142,6 +142,18 @@ async function getById(id) {
             attributes: ['id', 'name', 'avatar_url', 'email']
           }
         ]
+      },
+      {
+        model: models.CategoryRecipe,
+        as: 'categories',
+        attributes: ['id'],
+        include: [
+          {
+            model:  models.Category,
+            as: 'category',
+            attributes: ['id', 'en', 'vi']
+          }
+        ]
       }
     ]
   });
