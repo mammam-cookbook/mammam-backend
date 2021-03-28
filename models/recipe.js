@@ -58,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: "recipe_id",
             as: "comments"
           });
+        Recipe.rategories = Recipe.hasMany(models.CategoryRecipe, {
+            foreignKey: "recipe_id",
+            as: "categories"
+        });
       };
     return Recipe;
 };
