@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const CatgegoryRecipe = sequelize.define(
+    const CategoryRecipe = sequelize.define(
         "CategoryRecipe",
         {
             id: {
@@ -32,5 +32,16 @@ module.exports = (sequelize, DataTypes) => {
         }
     );
 
-    return CatgegoryRecipe;
+    CategoryRecipe.associate = (models) => {
+        CategoryRecipe.recipe = CategoryRecipe.belongsTo(models.Recipe, {
+          foreignKey: "recipe_id",
+          as: "recipe"
+        });
+        CategoryRecipe.category = CategoryRecipe.belongsTo(models.Category, {
+            foreignKey: "category_id",
+            as: "category"
+          });
+      };
+
+    return CategoryRecipe;
 };

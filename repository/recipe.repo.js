@@ -3,8 +3,34 @@ let Recipe = models.Recipe;
 const _ = require('lodash');
 const bcrypt = require("bcryptjs");
 const { Op } = require('sequelize')
-async function getAll() {
+async function getAll(type) {
+  const user_id = req.user.id;
+  let where;
+  if (type === 'recommend') {
+    // 
+  } else if (type === 'following') {
+    where = {
+      include: [
+        {
+          model: models.User,
+          as: 'author',
+          include: [
+            {
+              model: models.Follow,
+              as: 'follower',
+              where: {
+                user_id
+              }
+            }
+          ]
+        }
+      ]
+    }
+  } else if (type === 'highlights') {
+    // 
+  }
   return await Recipe.findAndCountAll({
+    where
   });
 }
 
@@ -79,7 +105,8 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     include: [
       {
         model: models.User,
-        as: 'author'
+        as: 'author',
+        attributes: ['id', 'name', 'avatar_url', 'email']
       }
     ],
     where: {
@@ -100,29 +127,31 @@ async function getById(id) {
       {
         model: models.User,
         as: 'author',
-        attributes: ['id', 'name', 'avatar_url', 'email']
+        attributes: ['id', 'name', 'avatar_url', 'email'],
+        raw: true
       },
       {
         model: models.Comment,
         as: 'comments',
-        attributes: ['id', 'images', 'content'],
+        raw: true,
+        attributes: ['id', 'images', 'content', 'parent_comment_id'],
         include: [
           {
             model: models.User,
             as: 'author',
             attributes: ['id', 'name', 'avatar_url', 'email']
-          },
+          }
+        ]
+      },
+      {
+        model: models.CategoryRecipe,
+        as: 'categories',
+        attributes: ['id'],
+        include: [
           {
-            model: models.Comment,
-            as: 'parentComment',
-            attributes: ['id', 'images', 'content'],
-            include: [
-              {
-                model: models.User,
-                as: 'author',
-                attributes: ['id', 'name', 'avatar_url', 'email']
-              },
-            ]
+            model:  models.Category,
+            as: 'category',
+            attributes: ['id', 'en', 'vi']
           }
         ]
       },
