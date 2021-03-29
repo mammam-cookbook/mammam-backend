@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
                 allowNull: false
             },
+            session: {
+                type: DataTypes.ENUM('morning', 'noon', 'night'),
+                allowNull: false
+            }
         },
         {
             tableName: "menu",
