@@ -67,6 +67,7 @@ app.use("/api/reaction", require("./routes/reaction.route"));
 app.use("/api/ingredient", require("./routes/ingredient.route"));
 app.use("/api/shopinglist", require("./routes/shoping.route"));
 app.use("/api/menu", require("./routes/menu.route"));
+app.use("/api/notification", require("./routes/notification.route"));
 
 app.use(function (req, res, next) {
   console.log("------ req.body -------", req.body);

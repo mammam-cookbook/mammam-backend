@@ -1,7 +1,10 @@
 const router = require("express").Router();
 const commentRepo = require("../repository/comment.repo");
+const recipeRepo = require("../repository/recipe.repo");
 const authorize = require('../middlewares/authorize');
 const permitRole = require("../middlewares/permitRole");
+const notificationRepo = require("../repository/notification.repo");
+const { sendCommenNotification } = require("../socketHandler/notification.handler");
 
 router.get("/", async function (req, res) {
   const result = await commentRepo.query(req.query);
@@ -12,23 +15,63 @@ router.get("/", async function (req, res) {
   }
 });
 // user, admin, mod
-router.post("/",authorize, permitRole('user'), async function (req, res) {
-  const comment = req.body;
-  Object.assign(comment, { user_id : req.user.id})
-  const createdComment = await commentRepo.create(comment);
-  if (createdComment) {
-    res.status(200).json({
-      result: 1,
-      comment: createdComment
-    });
+router.post("/", authorize, permitRole('user'), async function (req, res) {
+  try {
+    const comment = req.body;
+    Object.assign(comment, { user_id: req.user.id })
+    const createdComment = await commentRepo.create(comment);
+    if (createdComment) {
+      let parentComment;
+      const recipe = await recipeRepo.getById(comment.recipe_id);
+      if (comment.parent_comment_id) {
+        parentComment = await commentRepo.getById(parent_comment_id)
+      }
+      // create a notification
+      const notification = {
+        user_id: req.user.id,
+        type: comment.parent_comment_id ? 'reply' : 'comment',
+        receiver: comment.parent_comment_id ? parentComment.user.id : recipe.user.id,
+        recipe_id: comment.recipe_id,
+        comment_id: parentComment.id
+      }
+      const createdNotification = await notificationRepo.create(notification);
+      if (notification.type === "comment") {
+        const notificationData = {
+          id: createdNotification.id,
+          recipe,
+          sender: req.user,
+          receiver: recipe.user,
+          createdAt: createdNotification.createdAt
+        };
+        sendCommenNotification(req, notificationData)
+      } else if (notification.type === "reply") {
+        const notificationData = {
+          id: createdNotification.id,
+          recipe,
+          sender: req.user,
+          receiver: parentComment.user,
+          createdAt: createdNotification.createdAt
+        };
+        sendCommenNotification(req, notificationData)
+      }
+      res.status(200).json({
+        result: 1,
+        comment: createdComment
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      result: 0,
+      message: error.message
+    })
   }
 });
 
 
-router.delete("/:id",authorize, async (req, res) => {
+router.delete("/:id", authorize, async (req, res) => {
   try {
     const comment = await commentRepo.remove(req.params.id, req.user.id);
-    console.log(comment) 
+    console.log(comment)
     return res.status(200).json({
       result: 1
     })

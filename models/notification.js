@@ -33,12 +33,12 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: false
             },
             type: {
-                type: DataTypes.STRING,
+                type: DataTypes.ENUM('comment', 'like', 'follow', 'reply'),
                 allowNull: false
             },
             recipe_id: {
                 type: DataTypes.UUID,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: 'recipe',
                     key: 'id'
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             comment_id: {
                 type: DataTypes.UUID,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: 'comment',
                     key: 'id'
@@ -62,6 +62,25 @@ module.exports = (sequelize, DataTypes) => {
             underscored: true,
         }
     );
+
+    Notification.associate = (models) => {
+        Notification.recipe = Notification.belongsTo(models.Recipe, {
+            foreignKey: "recipe_id",
+            as: "recipe"
+          });
+        Notification.comment = Notification.belongsTo(models.Comment, {
+            foreignKey: "comment_id",
+            as: "comment"
+        });
+        Notification.sender = Notification.belongsTo(models.User, {
+            foreignKey: "sender_id",
+            as: "sender"
+        });
+        Notification.receiver = Notification.belongsTo(models.User, {
+            foreignKey: "receiver_id",
+            as: "receiver"
+        });
+      };
 
     return Notification;
 };
