@@ -38,5 +38,16 @@ module.exports = (sequelize, DataTypes) => {
         }
     );
 
+    Reaction.associate = (models) => {
+        Reaction.author = Reaction.belongsTo(models.User, {
+            foreignKey: "user_id",
+            as: "author"
+        });
+        Reaction.recipe = Reaction.belongsTo(models.Recipe, {
+            foreignKey: "recipe_id",
+            as: "recipe"
+        });
+    };
+
     return Reaction;
 };

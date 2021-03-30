@@ -154,6 +154,18 @@ async function getById(id) {
             attributes: ['id', 'en', 'vi']
           }
         ]
+      },
+      {
+        model: models.Reaction,
+        as: 'reactions',
+        attributes: ['id', 'react'],
+        include: [
+          {
+            model: models.User, 
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
       }
     ]
   });
