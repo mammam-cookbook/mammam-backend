@@ -1,7 +1,4 @@
 const models = require("../models");
-let Collection = models.Collection;
-let ShopingItem = models.ShopingItem;
-let Recipe = models.Recipe;
 let ShopingList = models.ShopingList;
 
 async function getAll({ user_id }) {
@@ -14,23 +11,15 @@ async function getAll({ user_id }) {
             where,
             attributes: ["id"],
             include: [
-                {
-                    model: models.ShopingItem,
-                    as: 'shopingItems',
-                    attributes: ["id"],
-                    include: [
-                        {
-                            model: models.Recipe,
-                            as: 'recipe',
-                            include: [
-                                {
-                                    model: models.User,
-                                    as: 'author'
-                                }
-                            ]
-                        }
-                    ]
-                }
+              {
+                model: models.User,
+                as: 'user',
+                attributes: ['id', 'name', 'avatar_url', 'email']
+              },
+              {
+                model: models.Recipe,
+                as: 'recipe'
+              }
             ]
         }
     );
@@ -41,32 +30,21 @@ async function getById(id) {
       where: {
         id
       },
-      attributes: ['id', 'name'],
-      include: [
-        {
-          model: models.CollectionItem,
-          as: 'recipes',
-          attributes: ['id', 'recipe_id'],
-          include: [
-            {
-              model: models.Recipe,
-              as: 'recipe'
-            }
-          ]
-        }
-      ]
+      attributes: ['id', 'user_id', 'recipe_id'],
     });
 }
 
+async function findShopingItem({ user_id, recipe_id }) {
+  return await ShopingList.findOne({
+    where: {
+      user_id,
+      recipe_id
+    }
+  });
+}
+
 async function create(shopingList) {
-    return ShopingList.create(shopingList, {
-        include: [
-            {
-                model: models.ShopingItem,
-                as: 'shopingItems'
-            }
-        ]
-    });
+    return ShopingList.create(shopingList);
 }
 
 async function update(id, shopingList) {
@@ -78,30 +56,22 @@ async function update(id, shopingList) {
 }
 
 async function removeRecipeFromShopingList({ recipe_id, user_id }) {
-  console.log('-------- function remove -------------');
   try {
     const foundShopingList = await ShopingList.findOne({
       where: {
-        user_id
+        user_id,
+        recipe_id
       }
     })
-    console.log('-------- shopiing list ------------', foundShopingList)
     if (!foundShopingList) {
       throw new Error('Not Found Shoping List')
     }
-
-    const foundRecipe = await ShopingItem.findOne({ where : { recipe_id, shoping_list_id: foundShopingList.id }})
-    if (foundRecipe) {
-      console.log('-------- found recioe --------', foundRecipe)
-      return ShopingItem.destroy({
+      return ShopingList.destroy({
         where: {
-          shoping_list_id: foundRecipe.shoping_list_id,
+          user_id,
           recipe_id
         }
       })
-    } else {
-      throw new Error('Recipe dose not exist in collection')
-    }
   } catch (error) {
     //
   }
@@ -112,5 +82,6 @@ module.exports = {
     getById,
     create,
     update,
-    removeRecipeFromShopingList
+    removeRecipeFromShopingList,
+    findShopingItem
 };

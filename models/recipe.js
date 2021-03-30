@@ -28,6 +28,9 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.ENUM('Pending', 'Approved'),
                 allowNull: false,
             },
+            level: {
+                type: DataTypes.ENUM('easy', 'medium', 'hard')
+            },
             user_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
