@@ -4,14 +4,7 @@ const _ = require('lodash');
 const { Op } = require('sequelize')
 async function getAll() {
     return await Category.findAndCountAll({
-        include: [
-            {
-                model: models.Category,
-                as: 'parentCategory',
-                attributes: ['vi', 'en', 'id']
-            }
-        ],
-        attributes: ['id', 'en', 'vi']
+        attributes: ['id', 'en', 'vi', 'parent_category_id']
     });
 }
 

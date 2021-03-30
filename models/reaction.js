@@ -10,11 +10,12 @@ module.exports = (sequelize, DataTypes) => {
             user_id: {
                 type: DataTypes.UUID,
                 references: {
-                    model: 'category',
+                    model: 'user',
                     key: 'id'
                 },
                 onUpdate: 'cascade',
-                onDelete: 'cascade'
+                onDelete: 'cascade',
+                unique: 'unique_cmt'
             },
             recipe_id: {
                 type: DataTypes.UUID,
@@ -23,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
                     key: 'id'
                 },
                 onUpdate: 'cascade',
-                onDelete: 'cascade'
+                onDelete: 'cascade',
+                unique: 'unique_cmt'
             },
             react: {
                 type: DataTypes.ENUM('yum', 'yuck', 'easy peasy', 'tough nut'),

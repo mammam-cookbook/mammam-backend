@@ -3,19 +3,44 @@ const categoryRepo = require("../repository/category.repo");
 const authorize = require('../middlewares/authorize');
 const permitRole = require("../middlewares/permitRole");
 
+
+const convertCategoryArrayToTreeArray = (arr) => {
+    const hashObj = {};
+    arr.forEach((item) => {
+      hashObj[item.id] = item;
+      item.dataValues.childrenCategories = [];
+    });
+  
+    const result = [];
+    arr.forEach((item) => {
+      if (item.dataValues.parent_category_id !== null) {
+        hashObj[item.parent_category_id].dataValues.childrenCategories.push(item);
+      } else {
+        result.push(item);
+      }
+    });
+  
+    return result;
+  };
+
 router.get("/", async function (req, res) {
     const categories = await categoryRepo.getAll();
+    const countResult = categories.count;
+    const categoriesResult = convertCategoryArrayToTreeArray(categories.rows);
     if (categories) {
         res.status(200).json({
             result: 1,
-            categories
+            categories: {
+                countResult,
+                categoriesResult
+            }
         });
     }
 });
 
 router.put("/:id",
     authorize,
-    permitRole(['mode', 'admin']),
+    permitRole('mod', 'admin'),
     (req, res) => {
         const { id } = req.params;
         const category = req.body;
@@ -33,7 +58,7 @@ router.put("/:id",
     })
 router.post("/",
     authorize,
-    permitRole(['user', 'admin']),
+    permitRole('user', 'admin'),
     async function (req, res) {
         const category = req.body;
         Object.assign(category, { user_id: req.user.id })
