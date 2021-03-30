@@ -17,6 +17,16 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: 'cascade',
                 onDelete: 'cascade'
             },
+            recipe_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
+                references: {
+                    model: 'recipe',
+                    key: 'id'
+                },
+                onUpdate: 'cascade',
+                onDelete: 'cascade'
+            },
         },
         {
             tableName: "shopingList",
@@ -29,9 +39,9 @@ module.exports = (sequelize, DataTypes) => {
           foreignKey: "user_id",
           as: "user"
         });
-        ShopingList.shopingItems= ShopingList.hasMany(models.ShopingItem, {
-            foreignKey: "shoping_list_id",
-            as: "shopingItems"
+        ShopingList.recipe = ShopingList.belongsTo(models.Recipe, {
+            foreignKey: "recipe_id",
+            as: "recipe"
           });
       };
 

@@ -34,8 +34,14 @@ router.get("/:id", authorize, async function (req, res) {
 router.post("/", authorize,
     permitRole('user'),
     async function (req, res) {
-        const shopingItem = req.body;
-        const shopingList = { user_id: req.user.id, shopingItems : [shopingItem]};
+        const shopingList = {...req.body, user_id: req.user.id}
+        const foundShopingItem = await shopingRepo.findShopingItem({ user_id: req.user.id, recipe_id: shopingList.recipe_id})
+        if (foundShopingItem) {
+            return res.status(400).json({
+                result: 0,
+                message: 'Item has been exist in Shoping List'
+            })
+        }
         const createdShopingList = await shopingRepo.create(shopingList);
         if (createdShopingList) {
             res.status(200).json({
