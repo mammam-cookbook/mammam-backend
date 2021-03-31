@@ -80,7 +80,9 @@ app.use(function (err, req, res, next) {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const port = process.env.PORT || 3001;
+app.listen(3001, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
+
+module.exports = app;
