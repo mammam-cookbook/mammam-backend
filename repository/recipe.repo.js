@@ -50,12 +50,14 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     if (Array.isArray(categories)) {
       extraWhereCondition = {
         ...extraWhereCondition,
-        categories: { [Op.contains]: categories }
+        categoryQuery: { [Op.contains]: categories }
+        //categories: { [Op.contains]: categories }
       }
     } else {
       extraWhereCondition = {
         ...extraWhereCondition,
-        categories: { [Op.contains]: [categories] }
+        categoryQuery: { [Op.contains]: categories }
+        //categories: { [Op.contains]: [categories] }
       }
     }
   }
@@ -102,6 +104,24 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
 
   // query
   return models.Recipe.findAndCountAll({
+    attributes : {
+      include: [
+        [
+          models.sequelize.literal(`(
+            SELECT id
+            FROM category AS cate
+            WHERE
+                cate.id = (
+                  SELECT category_id
+                  FROM CategoryRecipe AS cateRecipe
+                  WHERE
+                    cateRecipe.recipe_id = recipe.id
+                )
+          )`),
+          'categoryQuery'
+        ]
+      ]
+    },
     include: [
       {
         model: models.User,
