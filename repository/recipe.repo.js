@@ -113,9 +113,9 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
             WHERE
                 cate.id = (
                   SELECT category_id
-                  FROM CategoryRecipe AS cateRecipe
+                  FROM "categoryRecipe" AS cateRecipe 
                   WHERE
-                    cateRecipe.recipe_id = recipe.id
+                    cateRecipe.recipe_id = id
                 )
           )`),
           'categoryQuery'
