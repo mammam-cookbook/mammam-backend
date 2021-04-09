@@ -37,6 +37,7 @@ async function getAll(type) {
 async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder }) {
   let order = [];
   let extraWhereCondition = {};
+  let categoriesCondition = {};
 
   // where condition
   if (hashtag) {
@@ -47,16 +48,13 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     })
   }
   if (categories) {
-    if (Array.isArray(categories)) {
-      extraWhereCondition = {
-        ...extraWhereCondition,
-        categories: { [Op.contains]: categories }
-      }
-    } else {
-      extraWhereCondition = {
-        ...extraWhereCondition,
-        categories: { [Op.contains]: [categories] }
-      }
+    if (!Array.isArray(categories)) {
+      categories = [categories]
+    }
+    categoriesCondition = {
+      [Op.and]: categories.map((category =>{
+        return { category_id: category } 
+      }))
     }
   }
 
@@ -91,6 +89,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
             `${search}`), {
           [Op.gte]: '0.1'
         }),
+        {ingredients_name: { [Op.overlap]: [`%${search}%`] }}
       ]
     }
   }
@@ -100,13 +99,13 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     order.push(['created_at', createdOrder])
   }
 
-  // query
+  // query 
   return models.Recipe.findAndCountAll({
     include: [
       {
-        model: models.User,
-        as: 'author',
-        attributes: ['id', 'name', 'avatar_url', 'email']
+        model: models.CategoryRecipe,
+        as: 'categories',
+        where: categoriesCondition
       }
     ],
     where: {
