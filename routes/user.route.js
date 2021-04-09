@@ -4,6 +4,7 @@ const followRepo = require("../repository/follow.repo");
 const { register_message } = require("../utils/mail.model");
 const sendMail = require("../utils/mailer");
 const { route } = require("./auth.route");
+const notificationRepo = require("../repository/notification.repo");
 
 router.get('/', (req, res) => {
 })
@@ -44,6 +45,12 @@ router.post("/:id/follow/:following_id", async (req, res) => {
   const followData = { user_id: id, following_id};
   try {
     const follow = await followRepo.create(followData);
+    const notification = {
+      sender_id: id,
+      receiver_id: following_id,
+      type: 'follow'
+    }
+    await notificationRepo.create(notification)
     return res.status(200).json({
       follow
     })

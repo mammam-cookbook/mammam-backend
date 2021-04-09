@@ -43,7 +43,17 @@ async function query({ limit = 10, offset = 0, recipe_id }) {
 }
 
 async function getById(id) {
-    return await Comment.findByPk(id);
+    return await Comment.findOne({
+        where: {
+            id
+        },
+        include: [
+            {
+                model: models.User,
+                as: 'user'
+            }
+        ]
+    });
 }
 
 async function create(comment) {
