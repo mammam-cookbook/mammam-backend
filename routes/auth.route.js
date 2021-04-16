@@ -8,6 +8,7 @@ const sendMail = require("../utils/mailer");
 const crypto = require("crypto");
 const authorization = require("../middlewares/authorize");
 const bcrypt = require("bcryptjs");
+const redis = require('../utils/caching');
 
 router.post("/", async function (req, res) {
   const { email, password } = req.body;
@@ -24,9 +25,27 @@ router.post("/", async function (req, res) {
       });
     }
     const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "10d",
+      expiresIn: "1m",
     });
-    console.log({ token });
+
+    // set refresh token to redis
+    const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
+      expiresIn: "2d"
+    });
+    const isSet = await redis.set(refreshToken, findUser.id);
+    const isSetExpire = redis.expire(
+      refreshToken,
+      60*60*24
+    );
+    if (isSet && isSetExpire) {
+      console.log('---------- Save redis successfully! ----------');
+    } else {
+      return res.status(400).json({
+        result: 0,
+        message: 'Save redis failed'
+      })
+    }
+
     res.cookie("token", token, { expiresIn: "1d" });
     const { id, name, email, role, avatar_url } = findUser;
     return res.status(200).json({
@@ -105,4 +124,24 @@ router.post("/new-password", async (req, res) => {
       });
   });
 });
+
+router.post("/refresh-token", async (req, res) => {
+  const { refreshToken } = req.body;
+  const userId = await redis.getAsync(refreshToken);
+  console.log({ userId })
+  if (!userId) {
+    return res.status(400).json({
+      result: 0,
+      message: 'Invalid Refresh token'
+    })
+  }
+
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+
+  return res.status(200).json({
+    token
+  })
+})
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require("express");
 const socket_io = require("socket.io");
 const jwt = require("jsonwebtoken");
+var cron = require('node-cron');
 
 const app = express();
 require("dotenv").config();
@@ -17,6 +18,14 @@ const io = socket_io();
 app.io = io;
 
 app.set("socketio", io);
+
+var task = cron.schedule('* * * * *', () =>  {
+  console.log('stopped task');
+}, {
+  scheduled: false
+});
+
+task.start();
 
 io.use((socket, next) => {
   if (socket.handshake.query && socket.handshake.query.token) {
