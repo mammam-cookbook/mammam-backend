@@ -6,6 +6,9 @@ const sendMail = require("../utils/mailer");
 const { route } = require("./auth.route");
 const notificationRepo = require("../repository/notification.repo");
 
+const cuisineRepo = require("../repository/cuisineUser.repo");
+const dietRepo = require("../repository/dietUser.repo");
+
 router.get('/', (req, res) => {
 })
 
@@ -70,6 +73,66 @@ router.post("/:id/unfollow/:following_id", async (req, res) => {
       })
     }
   } catch (err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/:id/addcuisineuser/:category_id", async (req, res) => {
+  const { id, category_id } = req.params;
+  const cuisineData = { user_id: id, category_id };
+  try {
+    const cuisine = await cuisineRepo.create(cuisineData);
+    if (cuisine === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/:id/removecuisineuser/:category_id", async (req, res) => {
+  const { id, category_id } = req.params;
+  const cuisineData = { user_id: id, category_id };
+  try {
+    const cuisine = await cuisineRepo.remove(cuisineData);
+    if (cuisine === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/:id/adddietuser/:category_id", async (req, res) => {
+  const { id, category_id } = req.params;
+  const dietData = { user_id: id, category_id };
+  try {
+    const diet = await dietRepo.create(dietData);
+    if (diet === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/:id/removedietuser/:category_id", async (req, res) => {
+  const { id, category_id } = req.params;
+  const dietData = { user_id: id, category_id };
+  try {
+    const diet = await dietRepo.remove(dietData);
+    if (diet === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
     throw new Error(err);
   }
 })
