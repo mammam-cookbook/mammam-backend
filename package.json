@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --recursive --exit --timeout 10000",
     "dev": "nodemon server.js"
   },
   "repository": {
@@ -20,6 +20,7 @@
   "homepage": "https://github.com/mammam-cookbook/mammam-backend#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "chai": "^4.3.4",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
@@ -27,6 +28,7 @@
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
+    "mocha": "^8.3.2",
     "morgan": "^1.10.0",
     "nodemailer": "^6.4.17",
     "nodemon": "^2.0.7",
@@ -36,6 +38,7 @@
     "rand-token": "^1.0.1",
     "redis": "^3.0.2",
     "sequelize": "^6.4.0",
-    "socket.io": "^4.0.0"
+    "socket.io": "^4.0.0",
+    "supertest": "^6.1.3"
   }
 }
