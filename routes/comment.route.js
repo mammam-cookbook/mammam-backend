@@ -27,33 +27,33 @@ router.post("/", authorize, permitRole('user'), async function (req, res) {
         parentComment = await commentRepo.getById(parent_comment_id)
       }
       // create a notification
-      const notification = {
-        user_id: req.user.id,
-        type: comment.parent_comment_id ? 'reply' : 'comment',
-        receiver: comment.parent_comment_id ? parentComment.user?.id : recipe?.user?.id,
-        recipe_id: comment.recipe_id,
-        comment_id: parentComment?.id
-      }
-      const createdNotification = await notificationRepo.create(notification);
-      if (notification.type === "comment") {
-        const notificationData = {
-          id: createdNotification.id,
-          recipe,
-          sender: req.user,
-          receiver: recipe.user,
-          createdAt: createdNotification.createdAt
-        };
-        sendCommenNotification(req, notificationData)
-      } else if (notification.type === "reply") {
-        const notificationData = {
-          id: createdNotification.id,
-          recipe,
-          sender: req.user,
-          receiver: parentComment.user,
-          createdAt: createdNotification.createdAt
-        };
-        sendCommenNotification(req, notificationData)
-      }
+      // const notification = {
+      //   user_id: req.user.id,
+      //   type: comment.parent_comment_id ? 'reply' : 'comment',
+      //   receiver: comment.parent_comment_id ? parentComment.user?.id : recipe?.user?.id,
+      //   recipe_id: comment.recipe_id,
+      //   comment_id: parentComment?.id
+      // }
+      // const createdNotification = await notificationRepo.create(notification);
+      // if (notification.type === "comment") {
+      //   const notificationData = {
+      //     id: createdNotification.id,
+      //     recipe,
+      //     sender: req.user,
+      //     receiver: recipe.user,
+      //     createdAt: createdNotification.createdAt
+      //   };
+      //   sendCommenNotification(req, notificationData)
+      // } else if (notification.type === "reply") {
+      //   const notificationData = {
+      //     id: createdNotification.id,
+      //     recipe,
+      //     sender: req.user,
+      //     receiver: parentComment.user,
+      //     createdAt: createdNotification.createdAt
+      //   };
+      //   sendCommenNotification(req, notificationData)
+      // }
       res.status(200).json({
         result: 1,
         comment: createdComment
