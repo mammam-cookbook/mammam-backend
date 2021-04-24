@@ -30,9 +30,9 @@ router.post("/", authorize, permitRole('user'), async function (req, res) {
       const notification = {
         user_id: req.user.id,
         type: comment.parent_comment_id ? 'reply' : 'comment',
-        receiver: comment.parent_comment_id ? parentComment.user.id : recipe.user.id,
+        receiver: comment.parent_comment_id ? parentComment.user?.id : recipe?.user?.id,
         recipe_id: comment.recipe_id,
-        comment_id: parentComment.id
+        comment_id: parentComment?.id
       }
       const createdNotification = await notificationRepo.create(notification);
       if (notification.type === "comment") {
