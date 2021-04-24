@@ -81,13 +81,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
           models.sequelize.fn('similarity',
             models.sequelize.col("title"),
             `${search}`), {
-          [Op.gte]: '0.1'
-        }),
-        models.sequelize.where(
-          models.sequelize.fn('similarity',
-            models.sequelize.col("author.name"),
-            `${search}`), {
-          [Op.gte]: '0.1'
+          [Op.gte]: '0.3'
         }),
         {ingredients_name: { [Op.overlap]: [`%${search}%`] }}
       ]
@@ -105,7 +99,10 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
       {
         model: models.CategoryRecipe,
         as: 'categories',
-        where: categoriesCondition
+      },
+      {
+        model: models.User,
+        as: 'author',
       }
     ],
     where: {
