@@ -104,6 +104,22 @@ const comparePassword = (password, hash) =>{
   
 }
 
+async function editlevel(lv, userid) {
+  return User.update({level: lv},{
+    where: {
+        id: userid,
+    },
+  }
+  );
+}
+
+async function addAllergies(ingre, userid) {
+  return User.update(
+    { allergies: models.sequelize.fn('array_append', models.sequelize.col('allergies'), ingre)},
+    { where: {'id': userid}}
+  );
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -116,4 +132,6 @@ module.exports = {
   update_ref_token,
   getByEmail,
   comparePassword,
+  editlevel,
+  addAllergies,
 };

@@ -82,7 +82,7 @@ router.post("/:id/addcuisineuser/:category_id", async (req, res) => {
   const cuisineData = { user_id: id, category_id };
   try {
     const cuisine = await cuisineRepo.create(cuisineData);
-    if (cuisine === 1) {
+    if (cuisine[0] === 1) {
       return res.status(200).json({
         result: 1
       })
@@ -112,7 +112,7 @@ router.post("/:id/adddietuser/:category_id", async (req, res) => {
   const dietData = { user_id: id, category_id };
   try {
     const diet = await dietRepo.create(dietData);
-    if (diet === 1) {
+    if (diet[0] === 1) {
       return res.status(200).json({
         result: 1
       })
@@ -128,6 +128,36 @@ router.post("/:id/removedietuser/:category_id", async (req, res) => {
   try {
     const diet = await dietRepo.remove(dietData);
     if (diet === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/:id/userexperience", async (req, res) => {
+  const { id } = req.params;
+  const level = req.body.level;
+  try {
+    const result = await userRepo.editlevel(level, id);
+    if(result[0] === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/:id/adduserallergies", async (req, res) => {
+  const {id} = req.params;
+  const allergies = req.body.allergies;
+  try {
+    const result = await userRepo.addAllergies(allergies, id);
+    if(result[0] === 1) {
       return res.status(200).json({
         result: 1
       })
