@@ -67,62 +67,99 @@ router.post("/forgot-password", async (req, res) => {
         .status(422)
         .json({ error: "User dont exists with that email" });
     }
-    models.User.update(
-      { reset_password_token: token },
-      { where: { id: findUser.id } }
-    )
-      .then((result) => {
-        var mailOptions = {
-          from: "admin@mammam.com",
-          to: findUser.email,
-          subject: "Reset password email",
-          text: "That was easy!",
-          html: `
-          <p>You requested for password reset</p>
-          <h5>click in this <a href="https://localhost:3000/reset/${token}">link</a> to reset password</h5>
-          `,
-        };
-        const mail = sendMail(forget_message(findUser.email, token));
-        return res.status(200).json({
-          message: "Check email!",
-        });
-      })
-      .catch((error) => {
-        res.status(400).json({
-          error,
-        });
-      });
-  });
+    const cacheCode = redis.set(token, JSON.stringify({
+      email: findUser.email,
+      type: "forgot_password",
+    }));
+    console.log({ cacheCode })
+    const expireTime = redis.expire(
+      token,
+      process.env.CONFIRM_EXP || 86400
+    );
+    if (cacheCode && expireTime) {
+      sendMail(forget_message(findUser.email, token));
+      return res.status(200).json(
+        {
+          result: 1,
+          message: 'Check mail to reset password!'
+        }
+      );
+    }
+    return res.status(400).json({
+      result: 0,
+      error: 'Wrong',
+    });
+    // models.User.update(
+    //   { reset_password_token: token },
+    //   { where: { id: findUser.id } }
+    // )
+    //   .then((result) => {
+    //     var mailOptions = {
+    //       from: "admin@mammam.com",
+    //       to: findUser.email,
+    //       subject: "Reset password email",
+    //       text: "That was easy!",
+    //       html: `
+    //       <p>You requested for password reset</p>
+    //       <h5>click in this <a href="https://localhost:3000/reset/${token}">link</a> to reset password</h5>
+    //       `,
+    //     };
+    //     const mail = sendMail(forget_message(findUser.email, token));
+    //     return res.status(200).json({
+    //       message: "Check email!",
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     res.status(400).json({
+    //       error,
+    //     });
+    //   });
+    // });
+  })
 });
 
 router.post("/new-password", async (req, res) => {
   const { password, resetToken } = req.body;
-  const user = await models.User.findOne({
-    where: { reset_password_token: resetToken },
-  });
-  if (!user) {
-    return res.status(422).json({ error: "Try again session expired" });
-  }
-  bcrypt.hash(password, 12).then((hashedpassword) => {
-    models.User.update(
-      {
-        password: hashedpassword,
-        reset_password_token: null,
-        expire_token: null,
-      },
-      {
-        where: { id: user.id },
+  redis.get(resetToken, async function (err, data) {
+    console.log({ err, data })
+    // confirm code not exists
+    if (err || data === null) {
+      return res.status(400).json({ result: 0, message: "Confirm code not exits" });
+    } else {
+      if (redis.del(resetToken)) {
+        const parsedData = JSON.parse(data);
+        const {email, type} = parsedData;
+        switch (type) {
+          case "forgot_password": {
+            console.log({ email })
+            bcrypt.hash(password, 12).then((hashedpassword) => {
+              console.log({ hashedpassword })
+              models.User.update(
+                {
+                  password: hashedpassword,
+                  expire_token: null,
+                },
+                {
+                  where: { email: email },
+                }
+              )
+                .then(() => {
+                  res.json({ result: 1,  message: "password updated success" });
+                })
+                .catch((error) => {
+                  res.status(400).json({
+                    result: 0,
+                    error,
+                  });
+                });
+            });
+          }
+        }
+      } else {
+        return res.status(500).json({result: 0, message: "something wrong"});
       }
-    )
-      .then(() => {
-        res.json({ message: "password updated success" });
-      })
-      .catch((error) => {
-        res.status(400).json({
-          error,
-        });
-      });
-  });
+    }
+  })
 });
 
 router.post("/refresh-token", async (req, res) => {

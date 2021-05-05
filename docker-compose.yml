@@ -23,10 +23,9 @@ services:
     container_name: caching
     ports:
       - "6379:6379"
-    expose:
-      - "6379"
     volumes:
       - .docker/redis:/data
+    command: ["redis-server", "--appendonly", "yes"]
     restart: always
 
   postgres:

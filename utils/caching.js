@@ -7,4 +7,12 @@ let client = redis.createClient({
     port: process.env.REDIS_PORT || 6379
 })
 
+client.on("ready",function () {
+    console.log("Redis is ready");
+});
+
+client.on('error', function(err) {
+    console.log('Redis error: ' + err);
+});
+
 module.exports= client;
