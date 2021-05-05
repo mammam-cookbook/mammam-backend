@@ -50,6 +50,7 @@ router.post("/", async function (req, res) {
     const { id, name, email, role, avatar_url } = findUser;
     return res.status(200).json({
       token,
+      refreshToken,
       user: { id, name, email, role, avatar_url },
     });
   }

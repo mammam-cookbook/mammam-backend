@@ -66,6 +66,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
 
 //Config route
+app.get('/', (req, res) => {
+  res.status(200).send({
+    message: "Welcome to MAM API!",
+  });
+})
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
 app.use("/api/recipe", require("./routes/recipe.route"));
