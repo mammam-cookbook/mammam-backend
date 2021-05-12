@@ -167,4 +167,19 @@ router.post("/:id/adduserallergies", async (req, res) => {
   }
 })
 
+router.post("/:id/adduserdislikedingredient", async (req, res) => {
+  const {id} = req.params;
+  const disliked = req.body.disliked;
+  try {
+    const result = await userRepo.addDislikedIngredient(disliked, id);
+    if(result[0] === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
 module.exports = router;
