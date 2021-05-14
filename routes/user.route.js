@@ -8,6 +8,7 @@ const notificationRepo = require("../repository/notification.repo");
 
 const cuisineRepo = require("../repository/cuisineUser.repo");
 const dietRepo = require("../repository/dietUser.repo");
+const authorize = require("../middlewares/authorize");
 
 router.get('/', (req, res) => {
 })
@@ -77,9 +78,9 @@ router.post("/:id/unfollow/:following_id", async (req, res) => {
   }
 })
 
-router.post("/:id/addcuisineuser/:category_id", async (req, res) => {
-  const { id, category_id } = req.params;
-  const cuisineData = { user_id: id, category_id };
+router.post("/addcuisineuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const cuisineData = { user_id: req.user.id, category_id };
   try {
     const cuisine = await cuisineRepo.create(cuisineData);
     if (cuisine[0] === 1) {
@@ -92,9 +93,9 @@ router.post("/:id/addcuisineuser/:category_id", async (req, res) => {
   }
 })
 
-router.post("/:id/removecuisineuser/:category_id", async (req, res) => {
-  const { id, category_id } = req.params;
-  const cuisineData = { user_id: id, category_id };
+router.delete("/removecuisineuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const cuisineData = { user_id: req.user.id, category_id };
   try {
     const cuisine = await cuisineRepo.remove(cuisineData);
     if (cuisine === 1) {
@@ -107,9 +108,9 @@ router.post("/:id/removecuisineuser/:category_id", async (req, res) => {
   }
 })
 
-router.post("/:id/adddietuser/:category_id", async (req, res) => {
-  const { id, category_id } = req.params;
-  const dietData = { user_id: id, category_id };
+router.post("/adddietuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const dietData = { user_id: req.user.id, category_id };
   try {
     const diet = await dietRepo.create(dietData);
     if (diet[0] === 1) {
@@ -122,9 +123,9 @@ router.post("/:id/adddietuser/:category_id", async (req, res) => {
   }
 })
 
-router.post("/:id/removedietuser/:category_id", async (req, res) => {
-  const { id, category_id } = req.params;
-  const dietData = { user_id: id, category_id };
+router.delete("/removedietuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const dietData = { user_id: req.user.id, category_id };
   try {
     const diet = await dietRepo.remove(dietData);
     if (diet === 1) {
@@ -137,11 +138,12 @@ router.post("/:id/removedietuser/:category_id", async (req, res) => {
   }
 })
 
-router.post("/:id/userexperience", async (req, res) => {
-  const { id } = req.params;
+router.post("/userexperience", authorize, async (req, res) => {
+  //const { id } = req.params;
   const level = req.body.level;
   try {
-    const result = await userRepo.editlevel(level, id);
+    //const result = await userRepo.editlevel(level, id);
+    const result = await userRepo.editlevel(level, req.user.id);
     if(result[0] === 1) {
       return res.status(200).json({
         result: 1
@@ -152,11 +154,12 @@ router.post("/:id/userexperience", async (req, res) => {
   }
 })
 
-router.post("/:id/adduserallergies", async (req, res) => {
-  const {id} = req.params;
+router.post("/adduserallergies", authorize, async (req, res) => {
+  //const {id} = req.params;
   const allergies = req.body.allergies;
   try {
-    const result = await userRepo.addAllergies(allergies, id);
+    //const result = await userRepo.addAllergies(allergies, id);
+    const result = await userRepo.addAllergies(allergies, req.user.id);
     if(result[0] === 1) {
       return res.status(200).json({
         result: 1
@@ -167,11 +170,12 @@ router.post("/:id/adduserallergies", async (req, res) => {
   }
 })
 
-router.post("/:id/adduserdislikedingredient", async (req, res) => {
-  const {id} = req.params;
+router.post("/adduserdislikedingredient", authorize, async (req, res) => {
+  //const {id} = req.params;
   const disliked = req.body.disliked;
   try {
-    const result = await userRepo.addDislikedIngredient(disliked, id);
+    //const result = await userRepo.addDislikedIngredient(disliked, id);
+    const result = await userRepo.addDislikedIngredient(disliked, req.user.id);
     if(result[0] === 1) {
       return res.status(200).json({
         result: 1
