@@ -31,6 +31,17 @@ async function getById(id) {
         id
       },
       attributes: ['id', 'user_id', 'recipe_id'],
+      include: [
+        {
+          model: models.User,
+          as: 'user',
+          attributes: ['id', 'name', 'avatar_url', 'email']
+        },
+        {
+          model: models.Recipe,
+          as: 'recipe'
+        }
+      ]
     });
 }
 
@@ -39,7 +50,18 @@ async function findShopingItem({ user_id, recipe_id }) {
     where: {
       user_id,
       recipe_id
-    }
+    },
+    include: [
+      {
+        model: models.User,
+        as: 'user',
+        attributes: ['id', 'name', 'avatar_url', 'email']
+      },
+      {
+        model: models.Recipe,
+        as: 'recipe'
+      }
+    ]
   });
 }
 
