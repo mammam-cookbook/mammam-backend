@@ -59,6 +59,30 @@ router.post("/:id/follow/:following_id", async (req, res) => {
   }
 })
 
+router.get("/:id/follower", async(req, res) => {
+  const {id} = req.params;
+  try {
+    const followers = await followRepo.getFollowers(id);
+    return res.status(200).json({
+      followers
+    })
+  } catch (error) {
+    throw new Error(err);
+  }
+})
+
+router.get("/:id/following", async(req, res) => {
+  const {id} = req.params;
+  try {
+    const followings = await followRepo.getFollowings(id);
+    return res.status(200).json({
+      followings
+    })
+  } catch (error) {
+    throw new Error(err);
+  }
+})
+
 router.post("/:id/unfollow/:following_id", async (req, res) => {
   const { id, following_id} = req.params;
   const followData = { user_id: id, following_id};

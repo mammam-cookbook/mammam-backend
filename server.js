@@ -20,7 +20,7 @@ app.io = io;
 app.set("socketio", io);
 
 var task = cron.schedule('* * * * *', () =>  {
-  console.log('stopped task');
+  // console.log('stopped task');
 }, {
   scheduled: false
 });

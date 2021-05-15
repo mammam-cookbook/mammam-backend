@@ -33,6 +33,16 @@ router.get("/", async function (req, res) {
   }
 });
 
+router.get("/list",authorize, async function (req, res) {
+  console.log({ user: req.user })
+  const result = await recipeRepo.getAll(req.query.type, req.user.id);
+  if (result) {
+    res.status(200).json({
+      result
+    })
+  }
+});
+
 router.post("/",authorize, async function (req, res) {
   const recipe = req.body;
   const { categories } = recipe;

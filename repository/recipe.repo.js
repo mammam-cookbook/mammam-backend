@@ -2,35 +2,89 @@ const models = require("../models");
 let Recipe = models.Recipe;
 const _ = require('lodash');
 const bcrypt = require("bcryptjs");
+const followRepo = require('../repository/follow.repo');
 const { Op } = require('sequelize')
-async function getAll(type) {
-  const user_id = req.user.id;
+async function getAll(type, user_id) {
+  console.log({ type, user_id })
   let where;
+  let attributes;
+  let order;
   if (type === 'recommend') {
     // 
   } else if (type === 'following') {
+    const followings = await followRepo.getFollowings(user_id);
+    const followingIds = followings.map(item => item.following_id);
     where = {
-      include: [
-        {
-          model: models.User,
-          as: 'author',
-          include: [
-            {
-              model: models.Follow,
-              as: 'follower',
-              where: {
-                user_id
-              }
-            }
-          ]
-        }
-      ]
+      user_id: {
+        [Op.in]: followingIds
+      }
     }
   } else if (type === 'highlights') {
-    // 
+    attributes = {
+      include: [
+        [
+            models.sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM reaction AS reactions
+                WHERE reactions.recipe_id = "Recipe"."id"
+            )`),
+            'count'
+        ]
+      ]
+    }
+    order = [
+      [models.sequelize.literal('count'), 'DESC']
+    ]
   }
-  return await Recipe.findAndCountAll({
-    where
+  return await Recipe.findAll({
+    where,
+    attributes,
+    order,
+    include: [
+      {
+        model: models.User,
+        as: 'author',
+        attributes: ['id', 'name', 'avatar_url', 'email'],
+        raw: true
+      },
+      {
+        model: models.Comment,
+        as: 'comments',
+        raw: true,
+        attributes: ['id', 'images', 'content', 'parent_comment_id', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      },
+      {
+        model: models.CategoryRecipe,
+        as: 'categories',
+        attributes: ['id'],
+        include: [
+          {
+            model:  models.Category,
+            as: 'category',
+            attributes: ['id', 'en', 'vi']
+          }
+        ]
+      },
+      {
+        model: models.Reaction,
+        as: 'reactions',
+        attributes: ['id', 'react'],
+        include: [
+          {
+            model: models.User, 
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      }
+    ]
   });
 }
 
@@ -47,14 +101,12 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
       }
     })
   }
+  console.log({ categories })
   if (categories) {
-    if (!Array.isArray(categories)) {
-      categories = [categories]
-    }
     categoriesCondition = {
-      [Op.and]: categories.map((category =>{
-        return { category_id: category } 
-      }))
+      category_id: {
+        [Op.in] : categories
+      } 
     }
   }
 
@@ -97,20 +149,29 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
   return models.Recipe.findAndCountAll({
     include: [
       {
-        model: models.CategoryRecipe,
-        as: 'categories',
-      },
-      {
         model: models.User,
         as: 'author',
-      }
+      },
+      // {
+      //   model: models.CategoryRecipe,
+      //   as: "categories",
+      //   where: categoriesCondition,
+      //   attributes: {
+      //     include: [[models.sequelize.fn('COUNT', models.sequelize.col('categories.category_id')), 'numCategories']]
+      //   },
+      //   group: ['Recipe.id'],
+      //   include: [
+      //     {
+      //       model: models.Category,
+      //       as: 'category'
+      //     }
+      //   ]
+      // }
     ],
     where: {
       ...extraWhereCondition
     },
-    order,
-    limit,
-    offset
+    // having: [{}, 'COUNT(?) >= ?', '`categories.category_id`', categories.length]
   })
 }
 
@@ -130,7 +191,7 @@ async function getById(id) {
         model: models.Comment,
         as: 'comments',
         raw: true,
-        attributes: ['id', 'images', 'content', 'parent_comment_id'],
+        attributes: ['id', 'images', 'content', 'parent_comment_id', 'created_at', 'updated_at'],
         include: [
           {
             model: models.User,

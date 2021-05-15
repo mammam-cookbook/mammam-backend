@@ -17,7 +17,36 @@ async function remove({id, user_id, following_id}) {
   })
 }
 
+async function getFollowings(userId) {
+  return Follow.findAll({
+    where: {
+      user_id: userId
+    },
+    include: [
+     {
+       model: models.User,
+       as: 'following'
+     } 
+    ]
+  })
+}
+
+async function getFollowers(userId) {
+  return Follow.findAll({
+    where: {
+      following_id: userId
+    },
+    include: [
+      {
+        model: models.User,
+        as: 'user'
+      } 
+     ]
+  })
+}
 module.exports = {
   create,
-  remove
+  remove,
+  getFollowers,
+  getFollowings
 };
