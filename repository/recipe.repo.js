@@ -258,11 +258,23 @@ async function remove(id, user_id) {
   }
 }
 
+async function getRecipeFromUser(user_id)
+{
+  return await Recipe.findAll({
+    where: {
+      user_id: {
+        [Op.like]: user_id
+      }
+    },
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   create,
   update,
   remove,
-  filter
+  filter,
+  getRecipeFromUser,
 };
