@@ -78,7 +78,7 @@ router.post("/:id/unfollow/:following_id", async (req, res) => {
   }
 })
 
-router.post("/addcuisineuser/:category_id", authorize, async (req, res) => {
+router.post("/cuisineuser/:category_id", authorize, async (req, res) => {
   const { category_id } = req.params;
   const cuisineData = { user_id: req.user.id, category_id };
   try {
@@ -93,7 +93,7 @@ router.post("/addcuisineuser/:category_id", authorize, async (req, res) => {
   }
 })
 
-router.delete("/removecuisineuser/:category_id", authorize, async (req, res) => {
+router.delete("/cuisineuser/:category_id", authorize, async (req, res) => {
   const { category_id } = req.params;
   const cuisineData = { user_id: req.user.id, category_id };
   try {
@@ -108,7 +108,7 @@ router.delete("/removecuisineuser/:category_id", authorize, async (req, res) => 
   }
 })
 
-router.post("/adddietuser/:category_id", authorize, async (req, res) => {
+router.post("/dietuser/:category_id", authorize, async (req, res) => {
   const { category_id } = req.params;
   const dietData = { user_id: req.user.id, category_id };
   try {
@@ -123,7 +123,7 @@ router.post("/adddietuser/:category_id", authorize, async (req, res) => {
   }
 })
 
-router.delete("/removedietuser/:category_id", authorize, async (req, res) => {
+router.delete("/dietuser/:category_id", authorize, async (req, res) => {
   const { category_id } = req.params;
   const dietData = { user_id: req.user.id, category_id };
   try {
@@ -154,7 +154,7 @@ router.post("/userexperience", authorize, async (req, res) => {
   }
 })
 
-router.post("/adduserallergies", authorize, async (req, res) => {
+router.post("/userallergies", authorize, async (req, res) => {
   //const {id} = req.params;
   const allergies = req.body.allergies;
   try {
@@ -170,7 +170,7 @@ router.post("/adduserallergies", authorize, async (req, res) => {
   }
 })
 
-router.post("/adduserdislikedingredient", authorize, async (req, res) => {
+router.post("/userdislikedingredient", authorize, async (req, res) => {
   //const {id} = req.params;
   const disliked = req.body.disliked;
   try {
