@@ -88,10 +88,13 @@ async function getAll(type, user_id) {
   });
 }
 
-async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder }) {
+async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder, reactionOrder }) {
   let order = [];
   let extraWhereCondition = {};
   let categoriesCondition = {};
+  let attributes = [];
+  let having = {};
+  let group = []
 
   // where condition
   if (hashtag) {
@@ -101,13 +104,30 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
       }
     })
   }
-  console.log({ categories })
   if (categories) {
+    const inCategories = categories.map(item => `${item}`).toString();
+    console.log({ inCategories });
+    // attributes.push(
+    //   [
+    //     models.sequelize.literal(`(
+    //       SELECT COUNT(*)
+    //       FROM "categoryRecipe"
+    //       WHERE "categoryRecipe"."recipe_id" = "Recipe"."id" AND "categoryRecipe"."id" IN ('c4da0a47-c873-4615-b19e-dbd6d0e0cd37','750e4846-8266-45cc-8ce9-684037d36889')
+    //       GROUP BY "categoryRecipe"."recipe_id"
+    //   )`),
+    //   'matchCategoriesCount'
+    //   ]
+    // )
+    attributes.push([models.sequelize.fn('count', models.sequelize.col('Recipe.id')), 'countCategory'])
     categoriesCondition = {
       category_id: {
         [Op.in] : categories
       } 
     }
+    group.push('Recipe.id');
+    group.push('author.id');
+    group.push('categories.id')
+    having = { }
   }
 
   if (ingredients) {
@@ -144,33 +164,41 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
   if (createdOrder) {
     order.push(['created_at', createdOrder])
   }
+  if (reactionOrder) {
+    attributes.push(
+        [
+            models.sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM reaction AS reactions
+                WHERE reactions.recipe_id = "Recipe"."id"
+            )`),
+            'count'
+        ])
+    order.push( [models.sequelize.literal('count'), reactionOrder])
+  }
 
   // query 
   return models.Recipe.findAndCountAll({
+    attributes: {
+      include: attributes
+    },
     include: [
       {
         model: models.User,
         as: 'author',
       },
-      // {
-      //   model: models.CategoryRecipe,
-      //   as: "categories",
-      //   where: categoriesCondition,
-      //   attributes: {
-      //     include: [[models.sequelize.fn('COUNT', models.sequelize.col('categories.category_id')), 'numCategories']]
-      //   },
-      //   group: ['Recipe.id'],
-      //   include: [
-      //     {
-      //       model: models.Category,
-      //       as: 'category'
-      //     }
-      //   ]
-      // }
+      {
+        model: models.CategoryRecipe,
+        as: "categories",
+        where: categoriesCondition,
+        group
+      }
     ],
     where: {
       ...extraWhereCondition
     },
+    order,
+    group
     // having: [{}, 'COUNT(?) >= ?', '`categories.category_id`', categories.length]
   })
 }
