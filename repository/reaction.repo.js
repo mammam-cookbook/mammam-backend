@@ -75,19 +75,15 @@ async function update(id, reaction) {
     });
 }
 
-async function checkReaction(id, recipe_id) {
+async function checkReaction(user_id, recipe_id) {
     const reaction = await Reaction.findOne({
         where: {
-          user_id: {
-            [Op.eq]: id
-          },
-          recipe_id: {
-            [Op.eq]: recipe_id
-          }
+          user_id,
+          recipe_id
         }
     });
 
-    return reaction;
+    return reaction ? true : false;
 }
 
 

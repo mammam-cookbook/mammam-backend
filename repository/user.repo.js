@@ -7,8 +7,21 @@ const bcrypt = require("bcryptjs");
 
 const { Op } = require('sequelize');
 
-async function getAll() {
+async function searchUsers({limit = 10, offset = 0, keyword}) {
   return await User.findAndCountAll({
+    where: {
+      [Op.or]: [
+        {
+          name: { [Op.iLike]: `%${keyword}%` } 
+        },
+        {
+          email: { [Op.iLike]: `%${keyword}%` } 
+        }
+      ]
+      
+    },
+    limit,
+    offset,
     attributes: { exclude: ["password"] },
   });
 }
@@ -184,7 +197,7 @@ module.exports = {
   update_password,
   isEmailExist,
   getNameById,
-  getAll,
+  searchUsers,
   getById,
   create,
   update,

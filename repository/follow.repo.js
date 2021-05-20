@@ -31,28 +31,15 @@ async function getFollowings(userId) {
   })
 }
 
-async function checkFollow(id, recipe_id) {
-  const author_id = await Recipe.findOne({
-    where: {
-      id: {
-        [Op.eq]: recipe_id
-      }
-    },
-    attributes: ['user_id']
-  });
-
+async function checkFollow(user_id, following_id) {
   const follow = await Follow.findOne({
     where: {
-      user_id: {
-        [Op.eq]: author_id.dataValues.user_id
-      },
-      following_id: {
-        [Op.eq]: id
-      }
-    }
+      user_id,
+      following_id
+    },
   });
 
-  return follow;
+  return follow ? true : false;
 }
 
 async function getFollowers(userId) {

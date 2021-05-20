@@ -10,8 +10,9 @@ const recipeRepo = require("../repository/recipe.repo");
 const authorize = require("../middlewares/authorize");
 
 router.get('/', async (req, res) => {
+  const {keyword, limit, offset} = req.query;
   try {
-    const userlist = await userRepo.getAllUsers();
+    const userlist = await userRepo.searchUsers({ limit, offset, keyword });
     return res.status(200).json({
       userlist
     })

@@ -6,6 +6,7 @@ const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
 const categoryRecipeRepo = require("../repository/categoryRecipe.repo");
+const getUserId = require("../middlewares/getUserId");
 
 const convertCommentArrayToTreeArray = (arr) => {
   const hashObj = {};
@@ -67,8 +68,8 @@ router.post("/",authorize, async function (req, res) {
   }
 });
 
-router.get("/:id",async (req, res) => {
-  const { user } = req;
+router.get("/:id", getUserId, async (req, res) => {
+  const { userId, user } = req;
   const recipe = await recipeRepo.getById(req.params.id);
   if (!recipe) {
     return res.status(400).json({
@@ -81,15 +82,13 @@ router.get("/:id",async (req, res) => {
   }
 
   const recipeViews = await recipeViewsRepo.getViewsOfRecipe(recipe.id);
-
   // check if user reacted to or followed the author
-  const reaction = await reactionRepo.checkReaction(_.get(user, 'id'), recipe.id);
-  const follow = await followRepo.checkFollow(_.get(user, 'id'), recipe.id);
-  //
+  const isReaction = await reactionRepo.checkReaction(userId, recipe.id);
+  const isFollow = await followRepo.checkFollow(userId, recipe.dataValues.user_id);
 
   const comments = convertCommentArrayToTreeArray(recipe.comments);
   return res.status(200).json({
-    result: {...recipe.dataValues, comments, views: recipeViews, reaction, follow}
+    result: {...recipe.dataValues, comments, views: recipeViews, isReaction, isFollow}
   })
 })
 
