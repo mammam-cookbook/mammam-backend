@@ -1,6 +1,11 @@
 const models = require("../models");
 let User = models.User;
+let Reaction = models.Reaction;
+let Recipe = models.Recipe;
+let Follow = models.Follow;
 const bcrypt = require("bcryptjs");
+
+const { Op } = require('sequelize');
 
 async function getAll() {
   return await User.findAndCountAll({
@@ -104,6 +109,77 @@ const comparePassword = (password, hash) =>{
   
 }
 
+async function recipeDetail(id, recipe_id)
+{
+  const reaction = await Reaction.findOne({
+    where: {
+      user_id: {
+        [Op.eq]: id
+      },
+      recipe_id: {
+        [Op.eq]: recipe_id
+      }
+    }
+  });
+
+  const author_id = await Recipe.findOne({
+    where: {
+      id: {
+        [Op.eq]: recipe_id
+      }
+    },
+    attributes: ['user_id']
+  });
+
+  const follow = await Follow.findOne({
+    where: {
+      user_id: {
+        [Op.eq]: author_id.dataValues.user_id
+      },
+      following_id: {
+        [Op.eq]: id
+      }
+    }
+  });
+  
+  const result = { reaction, follow }; return result;
+
+  //return reaction;
+}
+
+async function getAllUsers() 
+{
+  return await User.findAndCountAll({
+  where: {
+    role: {
+      [Op.eq]: 'user'
+    }
+  },
+  include: [
+    {
+      model: models.Follow,
+      as: 'follower',
+      include: [
+        { 
+          model: models.User,
+          as: 'user'
+        }
+      ]
+    },
+    {
+      model: models.Follow,
+      as: 'following',
+      include: [
+        { 
+          model: models.User,
+          as: 'following'
+        }
+      ]
+    }
+  ]
+  });
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -116,4 +192,6 @@ module.exports = {
   update_ref_token,
   getByEmail,
   comparePassword,
+  getAllUsers,
+  recipeDetail,
 };

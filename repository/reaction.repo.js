@@ -75,6 +75,22 @@ async function update(id, reaction) {
     });
 }
 
+async function checkReaction(id, recipe_id) {
+    const reaction = await Reaction.findOne({
+        where: {
+          user_id: {
+            [Op.eq]: id
+          },
+          recipe_id: {
+            [Op.eq]: recipe_id
+          }
+        }
+    });
+
+    return reaction;
+}
+
+
 async function remove(id, user_id) {
     // const reaction = await getById(id);
     // if (!reaction) {
@@ -99,5 +115,6 @@ module.exports = {
     create,
     update,
     remove,
-    query
+    query,
+    checkReaction
 };

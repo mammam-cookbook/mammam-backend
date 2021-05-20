@@ -6,7 +6,18 @@ const sendMail = require("../utils/mailer");
 const { route } = require("./auth.route");
 const notificationRepo = require("../repository/notification.repo");
 
-router.get('/', (req, res) => {
+const recipeRepo = require("../repository/recipe.repo");
+const authorize = require("../middlewares/authorize");
+
+router.get('/', async (req, res) => {
+  try {
+    const userlist = await userRepo.getAllUsers();
+    return res.status(200).json({
+      userlist
+    })
+  } catch (error) {
+    throw new Error(error);
+  }
 })
 
 router.post("/", async function (req, res) {
@@ -95,6 +106,18 @@ router.post("/:id/unfollow/:following_id", async (req, res) => {
     }
   } catch (err) {
     throw new Error(err);
+  }
+})
+
+router.get("/:id/recipe", async (req, res) => {
+  const {id} = req.params;
+  try {
+    const recipes = await recipeRepo.getRecipeFromUser(id);
+    return res.status(200).json({
+      recipes
+    })
+  } catch (error) {
+    throw new Error(error);
   }
 })
 
