@@ -286,11 +286,68 @@ async function remove(id, user_id) {
   }
 }
 
+async function getRecipeFromUser(user_id)
+{
+  return await Recipe.findAll({ 
+    where: {
+      user_id: {
+        [Op.eq]: user_id
+      }
+    },
+    include: [
+      {
+        model: models.User,
+        as: 'author',
+        attributes: ['id', 'name', 'avatar_url', 'email'],
+        raw: true
+      },
+      {
+        model: models.Comment,
+        as: 'comments',
+        raw: true,
+        attributes: ['id', 'images', 'content', 'parent_comment_id', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      },
+      {
+        model: models.CategoryRecipe,
+        as: 'categories',
+        attributes: ['id'],
+        include: [
+          {
+            model:  models.Category,
+            as: 'category',
+            attributes: ['id', 'en', 'vi']
+          }
+        ]
+      },
+      {
+        model: models.Reaction,
+        as: 'reactions',
+        attributes: ['id', 'react'],
+        include: [
+          {
+            model: models.User, 
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      }
+    ]
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   create,
   update,
   remove,
-  filter
+  filter,
+  getRecipeFromUser,
 };
