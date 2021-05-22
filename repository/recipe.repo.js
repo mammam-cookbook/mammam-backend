@@ -190,15 +190,15 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
       {
         model: models.CategoryRecipe,
         as: "categories",
-        where: categoriesCondition,
-        group
+        // where: categoriesCondition,
+        // group
       }
     ],
     where: {
       ...extraWhereCondition
     },
     order,
-    group
+    // group
     // having: [{}, 'COUNT(?) >= ?', '`categories.category_id`', categories.length]
   })
 }
