@@ -122,4 +122,16 @@ router.get("/:id/recipe", async (req, res) => {
   }
 })
 
+router.put("/:id", authorize, async (req, res) => {
+  const {id} = req.params;
+  const user = req.body;
+  try {
+    const updatedUser = await userRepo.update(id, user);
+    return res.status(200).json({
+      updatedUser
+    })
+  } catch (error) {
+    throw new Error(error);
+  }
+})
 module.exports = router;
