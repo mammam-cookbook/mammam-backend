@@ -1,8 +1,11 @@
 const models = require("../models");
 let Reaction = models.Reaction;
+const recipeRepo = require('./recipe.repo');
+const notificationRepo = require('./notification.repo');
 const _ = require('lodash');
 const bcrypt = require("bcryptjs");
-const { Op } = require('sequelize')
+const { Op } = require('sequelize');
+const { sendNotification } = require("../socketHandler/notification.handler");
 async function getAll() {
     return await Reaction.findAndCountAll({
     });
@@ -34,7 +37,7 @@ async function getById(id) {
     return await Reaction.findByPk(id);
 }
 
-async function create(reaction) {
+async function create(req, reaction) {
     //return Reaction.create(reaction);
     const [created_react, created] = await Reaction.findOrCreate({
         where: { user_id: reaction.user_id, recipe_id : reaction.recipe_id },
@@ -43,6 +46,21 @@ async function create(reaction) {
         }
     });
     if (created) { //user has yet to react to this recipe
+        const recipe = await recipeRepo.getById(reaction.recipe_id);
+        const notification = {
+            sender_id: reaction.user_id,
+            receiver_id: recipe.user_id,
+            type: 'like'
+        }
+        const createdNotification = await notificationRepo.create(notification);
+        const notificationData = {
+            id: createdNotification.id,
+            sender: reaction.user,
+            receiver: recipe.author,
+            createdAt: createdNotification.createdAt
+        }
+        console.log({ createdNotification, notificationData})
+        sendNotification(req, notificationData);
         return created_react;
     }
     else //user has reacted to this recipe

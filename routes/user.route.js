@@ -4,6 +4,7 @@ const followRepo = require("../repository/follow.repo");
 const { register_message } = require("../utils/mail.model");
 const sendMail = require("../utils/mailer");
 const { route } = require("./auth.route");
+const { sendNotification } = require('../socketHandler/notification.handler')
 const notificationRepo = require("../repository/notification.repo");
 
 const recipeRepo = require("../repository/recipe.repo");
@@ -52,7 +53,7 @@ router.get("/:id",async (req, res) => {
   })
 })
 
-router.post("/:id/follow/:following_id", async (req, res) => {
+router.post("/:id/follow/:following_id", authorize, async (req, res) => {
   const { id, following_id} = req.params;
   const followData = { user_id: id, following_id};
   try {
@@ -62,7 +63,17 @@ router.post("/:id/follow/:following_id", async (req, res) => {
       receiver_id: following_id,
       type: 'follow'
     }
-    await notificationRepo.create(notification)
+    const createdNotification = await notificationRepo.create(notification);
+    const receiver = await userRepo.getById(following_id);
+    const notificationData = {
+      id: createdNotification.id,
+      sender: req.user,
+      receiver,
+      type: "follow",
+      createdAt: createdNotification.createdAt
+    }
+    console.log({ createdNotification, notificationData})
+    sendNotification(req, notificationData);
     return res.status(200).json({
       follow
     })
