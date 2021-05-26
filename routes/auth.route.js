@@ -9,6 +9,7 @@ const crypto = require("crypto");
 const authorization = require("../middlewares/authorize");
 const bcrypt = require("bcryptjs");
 const redis = require('../utils/caching');
+const authorize = require("../middlewares/authorize");
 
 router.post("/", async function (req, res) {
   const { email, password } = req.body;
@@ -160,6 +161,23 @@ router.post("/new-password", async (req, res) => {
         return res.status(500).json({result: 0, message: "something wrong"});
       }
     }
+  })
+});
+
+router.post("/change-password", authorize, async (req, res) => {
+  const { newPassword, password } = req.body;
+  const { user } = req;
+  if (!userRepo.comparePassword(password, user.password)) {
+    return res.status(400).json({
+      result: 0,
+      message: "Old password is wrong!"
+    })
+  }
+  const createdPassword = bcrypt.hashSync(newPassword, process.env.SALT || 10);
+  await userRepo.update(user.id, { password: createdPassword })
+  return res.status(200).json({
+    result: 1,
+    message: 'Change password successfully!'
   })
 });
 
