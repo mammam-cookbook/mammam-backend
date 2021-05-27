@@ -225,6 +225,11 @@ async function getById(id) {
             model: models.User,
             as: 'author',
             attributes: ['id', 'name', 'avatar_url', 'email']
+          },
+          {
+            model: models.Upvote,
+            as: 'upvotes',
+            attributes: ['id', 'user_id', 'comment_id']
           }
         ]
       },

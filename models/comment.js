@@ -66,6 +66,10 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: "recipe_id",
             as: "recipe"
         });
+        Comment.upvotes = Comment.hasMany(models.Upvote, {
+            foreignKey: "comment_id",
+            as: "upvotes"
+        });
     };
     return Comment;
 };

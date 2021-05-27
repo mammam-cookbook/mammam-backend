@@ -2,6 +2,7 @@ const router = require("express").Router();
 const recipeRepo = require("../repository/recipe.repo");
 const reactionRepo = require("../repository/reaction.repo");
 const followRepo = require("../repository/follow.repo");
+const upvoteRepo = require("../repository/upvote.repo");
 const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
@@ -84,6 +85,16 @@ router.get("/:id", getUserId, async (req, res) => {
   // check if user reacted to or followed the author
   const isReaction = await reactionRepo.checkReaction(userId, recipe.id);
   const isFollow = await followRepo.checkFollow(userId, recipe.dataValues.user_id);
+  // add upvote information to comments
+  for (var item of recipe.comments) {
+    const upvoteCount = await upvoteRepo.countUpvote(item.id);
+    const isUpvoted = await upvoteRepo.checkIfUpvoted(userId, item.id);
+    item.dataValues = {
+      ...item.dataValues,
+      upvoteCount: upvoteCount,
+      isUpvoted: isUpvoted
+    }
+  }
 
   const comments = convertCommentArrayToTreeArray(recipe.comments);
   return res.status(200).json({
