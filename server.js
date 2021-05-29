@@ -82,6 +82,7 @@ app.use("/api/ingredient", require("./routes/ingredient.route"));
 app.use("/api/shopinglist", require("./routes/shoping.route"));
 app.use("/api/menu", require("./routes/menu.route"));
 app.use("/api/notification", require("./routes/notification.route"));
+app.use("/api/upvote", require("./routes/upvote.route"));
 app.use("/api/challenge", require("./routes/challenge.route"));
 
 app.use(function (req, res, next) {

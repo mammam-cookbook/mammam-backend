@@ -16,7 +16,7 @@ services:
       - 3000:3000
     command: sh -c "npm i --no-optional && npm i -g sequelize-cli && sequelize db:migrate && npm start"
     volumes:
-      - .:/app
+      - ./:/app/
     restart: always
 
   redis:
