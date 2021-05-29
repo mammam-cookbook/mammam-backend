@@ -46,6 +46,11 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.DATE,
                 allowNull: true
             },
+            point: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                defaultValue: 0
+            }
         },
         {
             tableName: "user",

@@ -193,6 +193,29 @@ async function getAllUsers()
   });
 }
 
+async function addPoint(pts, user_id)
+{
+  var userPoint = await User.findOne({
+    where: {
+      id: user_id
+    },
+    attributes: ['point']
+  });
+
+  if(userPoint.dataValues.point === null)
+  {
+    userPoint.dataValues.point = 0;
+  }
+
+  userPoint.dataValues.point += pts;
+
+  return await User.update({point: userPoint.dataValues.point}, {
+    where: {
+        id: user_id,
+    }
+  });
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -207,4 +230,5 @@ module.exports = {
   comparePassword,
   getAllUsers,
   recipeDetail,
+  addPoint,
 };
