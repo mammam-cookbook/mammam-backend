@@ -88,7 +88,8 @@ async function getAll(type, user_id) {
   });
 }
 
-async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder, reactionOrder }) {
+async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime }) {
+  console.log({ excludeIngredients })
   let order = [];
   let extraWhereCondition = {};
   let categoriesCondition = {};
@@ -105,6 +106,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     })
   }
   if (categories) {
+    if (typeof categories === "string") categories = [categories]
     const inCategories = categories.map(item => `${item}`).toString();
     console.log({ inCategories });
     // attributes.push(
@@ -118,16 +120,47 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     //   'matchCategoriesCount'
     //   ]
     // )
-    attributes.push([models.sequelize.fn('count', models.sequelize.col('Recipe.id')), 'countCategory'])
+    // attributes.push([models.sequelize.fn('count', models.sequelize.col('Recipe.id')), 'countCategory'])
     categoriesCondition = {
       category_id: {
         [Op.in] : categories
       } 
     }
-    group.push('Recipe.id');
-    group.push('author.id');
-    group.push('categories.id')
-    having = { }
+    // group.push('Recipe.id');
+    // group.push('author.id');
+    // group.push('categories.id')
+    // having = { }
+  }
+
+  if (fromCookingTime && toCookingTime) {
+    extraWhereCondition = {
+      ...extraWhereCondition,
+      cooking_time: { 
+        [Op.between]: [fromCookingTime, toCookingTime] 
+      }
+    }
+  }
+
+  if (excludeIngredients) {
+    if (Array.isArray(excludeIngredients)) {
+      extraWhereCondition ={
+        ...extraWhereCondition,
+        [Op.not]: [
+          {
+          ingredients_name: { [Op.overlap]: [excludeIngredients] }
+          }
+        ] 
+      }
+    } else {
+      extraWhereCondition = {
+        ...extraWhereCondition,
+        [Op.not]: [
+          {
+          ingredients_name: { [Op.overlap]: [excludeIngredients] }
+          }
+        ] 
+      }
+    }
   }
 
   if (ingredients) {
@@ -190,7 +223,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
       {
         model: models.CategoryRecipe,
         as: "categories",
-        // where: categoriesCondition,
+        where: categoriesCondition,
         // group
       }
     ],
