@@ -61,6 +61,10 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: "recipe_id",
             as: "comments"
         });
+        Recipe.challenges = Recipe.hasMany(models.Challenge, {
+            foreignKey: "recipe_id",
+            as: "challenges"
+        })
         Recipe.reactions = Recipe.hasMany(models.Reaction, {
             foreignKey: "recipe_id",
             as: "reactions"
