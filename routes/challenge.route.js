@@ -46,9 +46,10 @@ router.post("/", authorize, permitRole('user'), async function (req, res) {
 
     const createdChallenge = await challengeRepo.create(challenge);
     if (createdChallenge) {
-      userRepo.addPoint(1, req.user.id);
+      userRepo.addPoint(2, req.user.id);
       //let parentComment;
-    //const recipe = await recipeRepo.getById(challenge.recipe_id);
+      const recipe = await recipeRepo.getById(challenge.recipe_id);
+      userRepo.addPoint(10, recipe.user_id);
       //   if (comment.parent_comment_id) {
       //     parentComment = await commentRepo.getById(comment.parent_comment_id)
       //   }
