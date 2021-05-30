@@ -1,5 +1,6 @@
 const esclient = require('../utils/elasticsearch');
 const recipeRepo = require('./recipe.repo')
+const userRepo = require('./user.repo')
 const _ = require('lodash')
 async function createIndex(index) { 
     try {
@@ -23,6 +24,19 @@ async function init() {
         console.log(response);
     });
     const recipeList = await recipeRepo.getAll();
+    const userList = await userRepo.getAllUsers();
+    const userIndex = {
+      index: 'users',
+      body: {
+          mappings: {
+              properties: {
+              id: { type: 'string' },
+              createdAt: { type: 'date'},
+              updatedAt: { type: 'date'},
+          }
+      }
+    }
+    }
     const recipeIndex = {
         index: 'recipes',
         body: {
@@ -49,11 +63,11 @@ async function init() {
                 reactions: { type: 'nested'}
             }
         }
-        }
+      }
     }
 
     await createIndex(recipeIndex)
-    const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes' } }, doc])
+    const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, doc])
     const { body: bulkResponse } = await esclient.bulk({ refresh: true, body })
 
     if (_.get(bulkResponse, 'errors')) {
