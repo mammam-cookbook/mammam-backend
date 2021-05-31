@@ -29,7 +29,8 @@ const convertCommentArrayToTreeArray = (arr) => {
 };
 
 router.get("/", async function (req, res) {
-  const result = await recipeRepo.filter(req.query);
+  const result = await recipeRepo.search(req.query);
+  console.log({ result })
   if (result) {
     res.status(200).json({
       result

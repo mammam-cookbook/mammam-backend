@@ -13,30 +13,15 @@ async function createIndex(index) {
 }
 
 async function init() {
-    esclient.deleteByQuery({
-        index: 'recipes',            
-        body: {
-            query: {
-                match_all: {}
-            }
-        }
-    }, function (error, response) {
-        console.log(response);
+    esclient.indices.delete({
+      index: 'recipes',
+    }).then(function(resp) {
+      console.log("Successful query!");
+      console.log(JSON.stringify(resp, null, 4));
+    }, function(err) {
+      console.trace(err.message);
     });
-    const recipeList = await recipeRepo.getAll();
-    const userList = await userRepo.getAllUsers();
-    const userIndex = {
-      index: 'users',
-      body: {
-          mappings: {
-              properties: {
-              id: { type: 'string' },
-              createdAt: { type: 'date'},
-              updatedAt: { type: 'date'},
-          }
-      }
-    }
-    }
+    let recipeList = await recipeRepo.getAll();
     const recipeIndex = {
         index: 'recipes',
         body: {
@@ -49,7 +34,6 @@ async function init() {
                 cooking_time: { type: 'Numbers'},
                 avatar: { type: 'string'},
                 status: { type: 'string'},
-                level: { type: 'string'},
                 user_id: { type: 'string'},
                 steps: { type: 'nested'},
                 ingredients: { type: 'nested'},
@@ -58,7 +42,6 @@ async function init() {
                 createdAt: { type: 'date'},
                 updatedAt: { type: 'date'},
                 author: { type: 'object'},
-                comments: { type: ' nested'},
                 categories: { type: 'nested'},
                 reactions: { type: 'nested'}
             }
@@ -67,7 +50,7 @@ async function init() {
     }
 
     await createIndex(recipeIndex)
-    const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, doc])
+    const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, doc ])
     const { body: bulkResponse } = await esclient.bulk({ refresh: true, body })
 
     if (_.get(bulkResponse, 'errors')) {
@@ -86,8 +69,8 @@ async function init() {
       console.log(erroredDocuments)
     }
   
-    const { body: count } = await esclient.count({ index: 'recipes' })
-    console.log(count)
+    const a = await esclient.count({ index: 'recipes' })
+    console.log("Number of documents in dex:", a)
 }
 
 function checkConnection() {
