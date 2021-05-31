@@ -267,6 +267,19 @@ async function getById(id) {
         ]
       },
       {
+        model: models.Challenge,
+        as: 'challenges',
+        raw: true,
+        attributes: ['id', 'images', 'content', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      },
+      {
         model: models.CategoryRecipe,
         as: 'categories',
         attributes: ['id'],
