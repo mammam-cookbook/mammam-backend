@@ -20,6 +20,13 @@ router.post("/", async function (req, res) {
     });
   }
   if (findUser) {
+    const IsBanned = await userRepo.checkIfBanned(findUser.id);
+    if (IsBanned === true) {
+      return res.status(400).json({
+        err: "User is currently banned",
+      });
+    }
+
     if (!userRepo.comparePassword(password, findUser.password)) {
       return res.status(400).json({
         err: "Password is wrong!!!",

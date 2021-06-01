@@ -251,6 +251,43 @@ async function addPoint(pts, user_id)
   });
 }
 
+async function banUser(user_id)
+{
+  return await User.update({status: 0}, {
+    where: {
+        id: user_id,
+    }
+  });
+}
+
+async function unbanUser(user_id)
+{
+  return await User.update({status: 1}, {
+    where: {
+        id: user_id,
+    }
+  });
+}
+
+async function checkIfBanned(user_id)
+{
+  const status = await User.findOne({
+    where:{
+      id: user_id,
+    },
+    attributes: ["status"]
+  });
+
+  if(status.dataValues.status === 1)
+  {
+    return false;
+  }
+  else if(status.dataValues.status === 0)
+  {
+    return true;
+  }
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -266,4 +303,7 @@ module.exports = {
   getAllUsers,
   recipeDetail,
   addPoint,
+  banUser,
+  unbanUser,
+  checkIfBanned
 };
