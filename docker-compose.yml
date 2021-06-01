@@ -41,3 +41,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: mammam
+
+  proxy:
+    image: nginx:alpine
+    container_name: web-proxy
+    restart: unless-stopped
+    volumes:
+      - ./proxy.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    depends_on:
+      - mammam-backend
