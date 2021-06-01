@@ -11,6 +11,14 @@ const bcrypt = require("bcryptjs");
 const redis = require('../utils/caching');
 const authorize = require("../middlewares/authorize");
 
+function verifyToken(token) {
+  return jwt.verify(token,process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+          throw new Error(err.message);
+      }
+      return decoded;
+  });
+}
 router.post("/", async function (req, res) {
   const { email, password } = req.body;
   const findUser = await userRepo.getByEmail(email);
@@ -28,17 +36,18 @@ router.post("/", async function (req, res) {
     const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-
     // set refresh token to redis
     const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
       expiresIn: "2d"
     });
-    const isSet = await redis.set(refreshToken, findUser.id);
+    const { exp: tokenExp } = verifyToken(token);
+    const { exp: refreshTokenExp } = verifyToken(refreshToken);
+    const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
     const isSetExpire = redis.expire(
       refreshToken,
-      60*60*24
+      60*60*24*2
     );
-    if (isSet && isSetExpire) {
+    if (isSet && isSetExpire ) {
       console.log('---------- Save redis successfully! ----------');
     } else {
       return res.status(400).json({
@@ -52,6 +61,8 @@ router.post("/", async function (req, res) {
     return res.status(200).json({
       token,
       refreshToken,
+      tokenExp,
+      refreshTokenExp,
       user: { id, name, email, role, avatar_url },
     });
   }

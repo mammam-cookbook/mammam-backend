@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 require("dotenv").config();
 var models =require('../models');
+const redis = require('../utils/caching');
 const { getById } = require('../repository/user.repo');
 
 module.exports = (req,res,next) => {
