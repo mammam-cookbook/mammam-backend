@@ -48,6 +48,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./proxy.conf:/etc/nginx/conf.d/default.conf
+      - ./mammam_me_chain.crt:/etc/ssl/mammam_me_chain.crt
     ports:
       - 80:80
     depends_on:
