@@ -43,6 +43,15 @@ async function getNameById(id){
   });
 }
 
+async function getEmailById(id){
+  return await User.findOne({
+    where:{
+      id: id,
+    },
+    attributes: ["email"]
+  });
+}
+
 async function getById(id) {
   return await User.findOne({
     where: {
@@ -305,5 +314,6 @@ module.exports = {
   addPoint,
   banUser,
   unbanUser,
-  checkIfBanned
+  checkIfBanned,
+  getEmailById
 };
