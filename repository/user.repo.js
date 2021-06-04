@@ -43,6 +43,15 @@ async function getNameById(id){
   });
 }
 
+async function getEmailById(id){
+  return await User.findOne({
+    where:{
+      id: id,
+    },
+    attributes: ["email"]
+  });
+}
+
 async function getById(id) {
   return await User.findOne({
     where: {
@@ -199,7 +208,7 @@ async function addPoint(pts, user_id)
     where: {
       id: user_id
     },
-    attributes: ['point']
+    attributes: ['point', 'rank']
   });
 
   if(userPoint.dataValues.point === null)
@@ -209,11 +218,83 @@ async function addPoint(pts, user_id)
 
   userPoint.dataValues.point += pts;
 
+  if(userPoint.dataValues.point < 0)
+  {
+    userPoint.dataValues.point = 0;
+  }
+
+  //0-100-300-600-1000
+  var rank;
+  switch (true) {
+    case (userPoint.dataValues.point >= 0 && userPoint.dataValues.point <= 100):
+        rank = "bronze";
+        break;
+    case (userPoint.dataValues.point > 100 && userPoint.dataValues.point <= 300):
+        rank = "silver"
+        break;
+    case (userPoint.dataValues.point > 300 && userPoint.dataValues.point <= 600):
+        rank = "gold"
+        break;
+    case (userPoint.dataValues.point > 600):
+        rank = "diamond"
+        break;
+  }
+  
+  if(rank === userPoint.dataValues.rank)
+  {
+    // do nothing cause rank doesn't change
+  }
+  else
+  {
+    const newRank = await User.update({rank: rank}, {
+      where: {
+          id: user_id,
+      }
+    });
+  }
+
   return await User.update({point: userPoint.dataValues.point}, {
     where: {
         id: user_id,
     }
   });
+}
+
+async function banUser(user_id)
+{
+  return await User.update({status: 0}, {
+    where: {
+        id: user_id,
+    }
+  });
+}
+
+async function unbanUser(user_id)
+{
+  return await User.update({status: 1}, {
+    where: {
+        id: user_id,
+    }
+  });
+}
+
+async function checkIfBanned(user_id)
+{
+  const status = await User.findOne({
+    where:{
+      id: user_id,
+    },
+    attributes: ["status"]
+  });
+
+  if(status.dataValues.status === 1)
+  {
+    return false;
+  }
+  else if(status.dataValues.status === 0)
+  {
+    return true;
+  }
 }
 
 module.exports = {
@@ -231,4 +312,8 @@ module.exports = {
   getAllUsers,
   recipeDetail,
   addPoint,
+  banUser,
+  unbanUser,
+  checkIfBanned,
+  getEmailById
 };

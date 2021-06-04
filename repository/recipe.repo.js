@@ -238,57 +238,69 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
   })
 }
 
-async function search({ search, categories, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime}) {
+async function search({ search, categories, limit = 10, offset = 0, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime}) {
   let must = [];
   let must_not;
   let filter = [];
-  if (search) {
-    must = [
-      ...must,
-      {
-        multi_match: {
-          query: search,
-          fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
-        }
-      }
-    ]
-  }
-  if (categories) {
-    categories = isArray(categories) ? categories : [categories]
-    console.log({ categories })
-    filter = [
-      ...filter,
-      {
-        "term": {
-          "categories.id": [
-              ...categories
-          ],
-          "execution" : "and"
-        }
-      }
-    ]
-  }
-  if (excludeIngredients) {
-    must_not =  [
-      {
-          term: {
-            "categories.": "tag-A"
-          }
-      }
-   ]
-  }
+  // if (search) {
+  //   must = [
+  //     ...must,
+  //     {
+  //       multi_match: {
+  //         query: search,
+  //         fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
+  //       }
+  //     }
+  //   ]
+  // }
+  // if (categories) {
+  //   categories = isArray(categories) ? categories : [categories]
+  //   console.log({ categories })
+  //   filter = [
+  //     ...filter,
+  //     {
+  //       "term": {
+  //         "categories.id": [
+  //             ...categories
+  //         ],
+  //         "execution" : "and"
+  //       }
+  //     }
+  //   ]
+  // }
+  // if (excludeIngredients) {
+  //   must_not =  [
+  //     {
+  //         term: {
+  //           "categories.": "tag-A"
+  //         }
+  //     }
+  //  ]
+  // }
   const body = await elasticClient.search({
     index: 'recipes',
+    from: offset,
+    size: limit,
     body: {
       query: {
         bool: {
-          must,
-          filter
+          must: [
+            {
+              multi_match: {
+                query: search,
+                fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
+              }
+            }
+          ]
         }
       }
     }
   })
-  return body.hits.hits;
+  console.log({ body: body.hits })
+  return {
+    result: body.hits.hits,
+    total: body.hits.total.value
+  }
 }
 
 async function getById(id) {
@@ -318,6 +330,19 @@ async function getById(id) {
             model: models.Upvote,
             as: 'upvotes',
             attributes: ['id', 'user_id', 'comment_id']
+          }
+        ]
+      },
+      {
+        model: models.Challenge,
+        as: 'challenges',
+        raw: true,
+        attributes: ['id', 'images', 'content', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
           }
         ]
       },

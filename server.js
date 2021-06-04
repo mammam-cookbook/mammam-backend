@@ -89,6 +89,7 @@ app.use("/api/menu", require("./routes/menu.route"));
 app.use("/api/notification", require("./routes/notification.route"));
 app.use("/api/upvote", require("./routes/upvote.route"));
 app.use("/api/challenge", require("./routes/challenge.route"));
+app.use("/api/admin", require("./routes/admin.route"));
 
 app.use(function (req, res, next) {
   console.log("------ req.body -------", req.body);

@@ -50,7 +50,12 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: true,
                 defaultValue: 0
-            }
+            },
+            rank: {
+                type: DataTypes.ENUM('bronze', 'silver', 'gold', 'diamond'),
+                allowNull: true,
+                defaultValue: 'bronze'
+            },
         },
         {
             tableName: "user",

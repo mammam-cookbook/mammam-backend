@@ -33,7 +33,7 @@ router.get("/", async function (req, res) {
   console.log({ result })
   if (result) {
     res.status(200).json({
-      result
+      ...result
     })
   }
 });
