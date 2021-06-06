@@ -21,7 +21,7 @@ async function init() {
     }, function(err) {
       console.trace(err.message);
     });
-    let recipeList = await recipeRepo.getAll();
+    let recipeList = await recipeRepo.getAllForElasticSearch();
     const recipeIndex = {
         index: 'recipes',
         body: {
@@ -41,16 +41,22 @@ async function init() {
                 hashtags: { type: 'nested'},
                 createdAt: { type: 'date'},
                 updatedAt: { type: 'date'},
-                author: { type: 'object'},
-                categories: { type: 'nested'},
-                reactions: { type: 'nested'}
+                author: { ype: 'nested'},
+                categories: { type: 'nested', index: "not_analyzed"},
+                reactions: { type: 'nested'},
+                comments: { type: 'nested' },
+                countReaction: { type: 'Numbers'}
             }
         }
       }
     }
 
     await createIndex(recipeIndex)
-    const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, doc ])
+    recipeList = recipeList.map(recipe => recipe.dataValues)
+    const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, {...doc, 
+      categories: doc.categories.map(category => category.category_id),
+      countReaction: doc.reactions.length
+    }])
     const { body: bulkResponse } = await esclient.bulk({ refresh: true, body })
 
     if (_.get(bulkResponse, 'errors')) {
@@ -89,8 +95,77 @@ function checkConnection() {
     });
 }
 
+async function deleteIndex(index) {
+  try {
+    if (!index) return false
+    await esclient.indices.delete({
+      index,
+      ignoreUnavailable: true
+    })
+
+    return true
+  } catch (e) {
+    console.log(`delete ${index} index error`, e.message)
+    return false
+  }
+}
+
+async function deleteIndexDoc(index, id) {
+  try {
+    await esclient.delete({
+      index,
+      refresh: 'wait_for',
+      id
+    })
+    return true
+  } catch (e) {
+    console.log(`delete ${index} index document id ${id}`, e.message)
+    return false
+  }
+}
+
+async function isElasticIndexExist(index) {
+  return esclient.indices.exists({ index })
+}
+
+async function updateIndexDoc(index, id, doc) {
+  try {
+
+    const { body: isDocExist = false } = await esclient.exists({
+      index,
+      id
+    })
+
+    delete doc._id
+
+    if (isDocExist) {
+      await esclient.update({
+        index,
+        id,
+        refresh: 'wait_for',
+        body: {
+          doc
+        }
+      })
+    } else {
+      await esclient.index({
+        index,
+        id,
+        refresh: 'wait_for',
+        body: doc
+      })
+    }
+  } catch (e) {
+    logger.info(`update ${index} index document id ${id}`, e.message)
+  }
+}
+
 module.exports = {
     createIndex,
     init,
-    checkConnection
+    checkConnection,
+    deleteIndexDoc,
+    deleteIndex,
+    isElasticIndexExist,
+    updateIndexDoc
 }

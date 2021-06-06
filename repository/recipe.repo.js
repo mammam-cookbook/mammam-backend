@@ -90,6 +90,29 @@ async function getAll(type, user_id) {
   });
 }
 
+async function getAllForElasticSearch() {
+  return await Recipe.findAll({
+    include: [
+      {
+        model: models.User,
+        as: 'author',
+        attributes: ['id', 'name', 'avatar_url', 'email'],
+        raw: true
+      },
+      {
+        model: models.CategoryRecipe,
+        as: 'categories',
+        attributes: ['id', 'category_id'],
+      },
+      {
+        model: models.Reaction,
+        as: 'reactions',
+        attributes: ['id', 'react']
+      }
+    ]
+  });
+}
+
 async function filter({ search, limit = 10, offset = 0, categories, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime }) {
   console.log({ excludeIngredients })
   let order = [];
@@ -239,60 +262,69 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
 }
 
 async function search({ search, categories, limit = 10, offset = 0, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime}) {
-  let must = [];
-  let must_not;
-  let filter = [];
-  // if (search) {
-  //   must = [
-  //     ...must,
-  //     {
-  //       multi_match: {
-  //         query: search,
-  //         fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
-  //       }
-  //     }
-  //   ]
-  // }
-  // if (categories) {
-  //   categories = isArray(categories) ? categories : [categories]
-  //   console.log({ categories })
-  //   filter = [
-  //     ...filter,
-  //     {
-  //       "term": {
-  //         "categories.id": [
-  //             ...categories
-  //         ],
-  //         "execution" : "and"
-  //       }
-  //     }
-  //   ]
-  // }
-  // if (excludeIngredients) {
-  //   must_not =  [
-  //     {
-  //         term: {
-  //           "categories.": "tag-A"
-  //         }
-  //     }
-  //  ]
-  // }
+  let mustQuery = [];
+  let filter = {};
+  let sortField = [];
+  let mustNotQuery = [];
+  let shouldQuery= [];
+  if (excludeIngredients) {
+    mustNotQuery.push({
+      term: {
+        "categories.": "tag-A"
+      }
+  })
+  }  
+  if (search) {
+    mustQuery.push({
+      multi_match: {
+        query: search,
+        fields: [ "title", "description", "steps.content", "author.name"]
+      }
+    })
+  }
+  if (categories) {
+    categories = isArray(categories) ? categories : [categories]
+    shouldQuery = categories.map(category => {
+      return {
+        term: {
+          categories: category
+        }
+      }
+    })
+  }
+  if (createdOrder) {
+    sortField.push({
+      "createdAt": { "order" : createdOrder}
+    })
+  }
+  if (reactionOrder) {
+    sortField.push({
+      "countReaction": { "order": reactionOrder}
+    })
+  }
+  if (toCookingTime && fromCookingTime) {
+    mustQuery.push({
+      "range": {
+        "cooking_time" : { 
+          "gte" : fromCookingTime,
+          "lte" : toCookingTime,
+          "boost" : 2.0
+         }
+      }
+    })
+  }
+  console.log({ shouldQuery })
   const body = await elasticClient.search({
     index: 'recipes',
     from: offset,
     size: limit,
     body: {
+      sort: sortField,
       query: {
         bool: {
-          must: [
-            {
-              multi_match: {
-                query: search,
-                fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
-              }
-            }
-          ]
-        }
+          must: mustQuery,
+          shouldQuery
+        },
       }
     }
   })
@@ -316,37 +348,6 @@ async function getById(id) {
         raw: true
       },
       {
-        model: models.Comment,
-        as: 'comments',
-        raw: true,
-        attributes: ['id', 'images', 'content', 'parent_comment_id', 'created_at', 'updated_at'],
-        include: [
-          {
-            model: models.User,
-            as: 'author',
-            attributes: ['id', 'name', 'avatar_url', 'email']
-          },
-          {
-            model: models.Upvote,
-            as: 'upvotes',
-            attributes: ['id', 'user_id', 'comment_id']
-          }
-        ]
-      },
-      {
-        model: models.Challenge,
-        as: 'challenges',
-        raw: true,
-        attributes: ['id', 'images', 'content', 'created_at', 'updated_at'],
-        include: [
-          {
-            model: models.User,
-            as: 'author',
-            attributes: ['id', 'name', 'avatar_url', 'email']
-          }
-        ]
-      },
-      {
         model: models.CategoryRecipe,
         as: 'categories',
         attributes: ['id'],
@@ -362,13 +363,6 @@ async function getById(id) {
         model: models.Reaction,
         as: 'reactions',
         attributes: ['id', 'react'],
-        include: [
-          {
-            model: models.User, 
-            as: 'author',
-            attributes: ['id', 'name', 'avatar_url', 'email']
-          }
-        ]
       }
     ]
   });
@@ -468,5 +462,6 @@ module.exports = {
   remove,
   filter,
   getRecipeFromUser,
-  search
+  search,
+  getAllForElasticSearch
 };
