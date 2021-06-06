@@ -350,7 +350,7 @@ async function getById(id) {
       {
         model: models.CategoryRecipe,
         as: 'categories',
-        attributes: ['id'],
+        attributes: ['id', 'category_id'],
         include: [
           {
             model:  models.Category,

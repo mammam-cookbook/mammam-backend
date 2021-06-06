@@ -8,6 +8,7 @@ const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
 const categoryRecipeRepo = require("../repository/categoryRecipe.repo");
 const getUserId = require("../middlewares/getUserId");
+const elasticRepo = require("../repository/elasticsearch.repo")
 
 const convertCommentArrayToTreeArray = (arr) => {
   const hashObj = {};
@@ -56,6 +57,7 @@ router.post("/",authorize, async function (req, res) {
   if (createdRecipe) {
     try {
       await Promise.all( await categories.map(category => categoryRecipeRepo.create({ recipe_id: createdRecipe.id, category_id: category })));
+      await elasticRepo.updateIndexDoc('recipes', createdRecipe.id, {...createdRecipe, countReaction: 0, categories })
       res.status(200).json({
         result: 1,
         recipe: createdRecipe

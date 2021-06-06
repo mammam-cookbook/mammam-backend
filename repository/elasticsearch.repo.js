@@ -156,7 +156,7 @@ async function updateIndexDoc(index, id, doc) {
       })
     }
   } catch (e) {
-    logger.info(`update ${index} index document id ${id}`, e.message)
+    console.log(`update ${index} index document id ${id}`, e.message)
   }
 }
 

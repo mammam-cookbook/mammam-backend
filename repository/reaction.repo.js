@@ -3,6 +3,7 @@ let Reaction = models.Reaction;
 const recipeRepo = require('./recipe.repo');
 const notificationRepo = require('./notification.repo');
 const _ = require('lodash');
+const elasticRepo = require('../repository/elasticsearch.repo')
 const bcrypt = require("bcryptjs");
 const { Op } = require('sequelize');
 const { sendNotification } = require("../socketHandler/notification.handler");
@@ -45,8 +46,10 @@ async function create(req, reaction) {
             react: reaction.react
         }
     });
+
+    let recipe = await recipeRepo.getById(reaction.recipe_id);
+    recipe = recipe.dataValues;
     if (created) { //user has yet to react to this recipe
-        const recipe = await recipeRepo.getById(reaction.recipe_id);
         const notification = {
             sender_id: reaction.user_id,
             receiver_id: recipe.user_id,
@@ -61,12 +64,20 @@ async function create(req, reaction) {
         }
         console.log({ createdNotification, notificationData})
         sendNotification(req, notificationData);
+        console.log({ body: {...recipe, countReaction: recipe.reactions.length}})
+        await elasticRepo.updateIndexDoc('recipes', recipe.id, {...recipe, 
+            countReaction: recipe.reactions.length,
+            categories: recipe.categories.map(category => category.category_id)
+        })
         return created_react;
     }
     else //user has reacted to this recipe
     {
         if(created_react.react === reaction.react) //this reaction exists, get rid of it
         {
+            await elasticRepo.updateIndexDoc('recipes', recipe.id, {...recipe, 
+                countReaction: recipe.reactions.length -1,
+                categories: recipe.categories.map(category => category.category_id)})
             return await Reaction.destroy({
                 where: {
                     id: created_react.id,
@@ -75,6 +86,10 @@ async function create(req, reaction) {
         }
         else //this reaction doesnt exist, update it
         {
+            await elasticRepo.updateIndexDoc('recipes', recipe.id, {...recipe, 
+                countReaction: recipe.reactions.length,
+                categories: recipe.categories.map(category => category.category_id)
+            })
             return Reaction.update({react: reaction.react},{
                 where: {
                     id: created_react.id,

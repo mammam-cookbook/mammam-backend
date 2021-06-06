@@ -41,7 +41,7 @@ router.post("/", async function (req, res) {
       });
     }
     const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "1m",
+      expiresIn: "1d",
     });
     // set refresh token to redis
     const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
