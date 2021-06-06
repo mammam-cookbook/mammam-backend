@@ -2,8 +2,10 @@ const models = require("../models");
 let Recipe = models.Recipe;
 const _ = require('lodash');
 const bcrypt = require("bcryptjs");
+const elasticClient = require("../utils/elasticsearch");
 const followRepo = require('../repository/follow.repo');
-const { Op } = require('sequelize')
+const { Op } = require('sequelize');
+const { isArray } = require("lodash");
 async function getAll(type, user_id) {
   console.log({ type, user_id })
   let where;
@@ -63,7 +65,7 @@ async function getAll(type, user_id) {
       {
         model: models.CategoryRecipe,
         as: 'categories',
-        attributes: ['id'],
+        attributes: ['id', 'category_id'],
         include: [
           {
             model:  models.Category,
@@ -236,6 +238,71 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
   })
 }
 
+async function search({ search, categories, limit = 10, offset = 0, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime}) {
+  let must = [];
+  let must_not;
+  let filter = [];
+  // if (search) {
+  //   must = [
+  //     ...must,
+  //     {
+  //       multi_match: {
+  //         query: search,
+  //         fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
+  //       }
+  //     }
+  //   ]
+  // }
+  // if (categories) {
+  //   categories = isArray(categories) ? categories : [categories]
+  //   console.log({ categories })
+  //   filter = [
+  //     ...filter,
+  //     {
+  //       "term": {
+  //         "categories.id": [
+  //             ...categories
+  //         ],
+  //         "execution" : "and"
+  //       }
+  //     }
+  //   ]
+  // }
+  // if (excludeIngredients) {
+  //   must_not =  [
+  //     {
+  //         term: {
+  //           "categories.": "tag-A"
+  //         }
+  //     }
+  //  ]
+  // }
+  const body = await elasticClient.search({
+    index: 'recipes',
+    from: offset,
+    size: limit,
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                query: search,
+                fields: [ "title", "description", "steps.content", "author.name", "categories.category.vi"]
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+  console.log({ body: body.hits })
+  return {
+    result: body.hits.hits,
+    total: body.hits.total.value
+  }
+}
+
 async function getById(id) {
   return await Recipe.findOne({
     where: {
@@ -401,4 +468,5 @@ module.exports = {
   remove,
   filter,
   getRecipeFromUser,
+  search
 };
