@@ -263,16 +263,25 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
 
 async function search({ search, categories, limit = 10, offset = 0, hashtag, ingredients, createdOrder, reactionOrder, excludeIngredients, fromCookingTime, toCookingTime}) {
   let mustQuery = [];
-  let filter = {};
+  let filter = [];
   let sortField = [];
   let mustNotQuery = [];
   let shouldQuery= [];
   if (excludeIngredients) {
-    mustNotQuery.push({
-      term: {
-        "categories.": "tag-A"
-      }
-  })
+    excludeIngredients = isArray(excludeIngredients) ? excludeIngredients : [excludeIngredients]
+    if (excludeIngredients.length > 1) {
+      mustNotQuery.push({
+        terms: {
+          "ingredients_name.keyword": excludeIngredients 
+        }
+      })
+    } else {
+      mustNotQuery.push({
+        term: {
+          "ingredients_name.keyword": excludeIngredients[0]
+        }
+      })
+    }
   }  
   if (search) {
     mustQuery.push({
@@ -284,13 +293,19 @@ async function search({ search, categories, limit = 10, offset = 0, hashtag, ing
   }
   if (categories) {
     categories = isArray(categories) ? categories : [categories]
-    shouldQuery = categories.map(category => {
-      return {
-        term: {
-          categories: category
+    if (categories.length > 1) {
+      filter.push({
+        terms: {
+          "categories.keyword": categories 
         }
-      }
-    })
+      })
+    } else {
+      filter.push({
+        term: {
+          "categories.keyword": categories[0]
+        }
+      })
+    }
   }
   if (createdOrder) {
     sortField.push({
@@ -313,7 +328,17 @@ async function search({ search, categories, limit = 10, offset = 0, hashtag, ing
       }
     })
   }
-  console.log({ shouldQuery })
+  console.log({ shouldQuery: JSON.stringify(shouldQuery) })
+  console.log({ body: JSON.stringify({
+    sort: sortField,
+    query: {
+      bool: {
+        must: mustQuery,
+        filter,
+        must_not: mustNotQuery
+      },
+    }
+  })})
   const body = await elasticClient.search({
     index: 'recipes',
     from: offset,
@@ -323,7 +348,8 @@ async function search({ search, categories, limit = 10, offset = 0, hashtag, ing
       query: {
         bool: {
           must: mustQuery,
-          shouldQuery
+          filter,
+          must_not: mustNotQuery
         },
       }
     }
