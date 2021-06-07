@@ -40,10 +40,19 @@ async function remove(id) {
     }
 }
 
+async function getByKey(key) {
+    return await Problem.findOne({
+        where: {
+            key
+        },
+    });
+}
+
 module.exports = {
     getAll,
     getById,
     create,
     update,
     remove,
+    getByKey
 };

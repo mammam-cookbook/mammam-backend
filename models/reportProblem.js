@@ -1,55 +1,45 @@
 module.exports = (sequelize, DataTypes) => {
-    const Report = sequelize.define(
-        "Report",
+    const ReportProblem = sequelize.define(
+        "ReportProblem",
         {
             id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true
             },
-            note: {
-                type: DataTypes.STRING,
-            },
-            user_id: {
+            report_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
                 references: {
-                    model: 'user',
+                    model: 'report',
                     key: 'id'
                 },
                 onUpdate: 'cascade',
                 onDelete: 'cascade'
             },
-            recipe_id: {
+            problem_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
                 references: {
-                    model: 'recipe',
+                    model: 'problem',
                     key: 'id'
                 },
                 onUpdate: 'cascade',
                 onDelete: 'cascade'
-            },
+            }
         },
         {
-            tableName: "report",
+            tableName: "reportProblem",
             underscored: true,
         }
     );
 
-    Report.associate = (models) => {
-        Report.recipe = Report.belongsTo(models.Recipe, {
-            foreignKey: "recipe_id",
-            as: "recipe"
+    ReportProblem.associate = (models) => {
+        ReportProblem.problem = ReportProblem.belongsTo(models.Problem, {
+            foreignKey: "problem_id",
+            as: "problem"
         });
-        Report.author = Report.belongsTo(models.User, {
-            foreignKey: "user_id",
-            as: "author"
-        });
-        Report.reportProblem = Report.hasMany(models.ReportProblem, {
-            foreignKey: "report_id",
-            as: "reportProblem"
-        })
     };
-    return Report;
+      
+    return ReportProblem;
 };

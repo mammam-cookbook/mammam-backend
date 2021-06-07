@@ -8,6 +8,20 @@ async function getAll() {
             {
                 model: models.Recipe,
                 as: 'recipe'
+            },
+            {
+                model: models.User,
+                as: 'author'
+            },
+            {
+                model: models.ReportProblem,
+                as: 'reportProblem',
+                include: [
+                    {
+                        model: models.Problem,
+                        as: 'problem'
+                    }
+                ]
             }
         ]
     });
