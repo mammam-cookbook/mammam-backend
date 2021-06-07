@@ -2,7 +2,7 @@ const express = require("express");
 const socket_io = require("socket.io");
 const jwt = require("jsonwebtoken");
 var cron = require('node-cron');
-
+const esclient = require('./repository/elasticsearch.repo');
 const app = express();
 require("dotenv").config();
 //Log request
@@ -65,6 +65,11 @@ let bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
 
+esclient.checkConnection().then(data => {
+  if (data) {
+    esclient.init();
+  }
+});
 //Config route
 app.get('/', (req, res) => {
   res.status(200).send({
@@ -86,6 +91,7 @@ app.use("/api/upvote", require("./routes/upvote.route"));
 app.use("/api/challenge", require("./routes/challenge.route"));
 app.use("/api/problem", require("./routes/problem.route"));
 app.use("/api/report", require("./routes/report.route"));
+app.use("/api/admin", require("./routes/admin.route"));
 
 app.use(function (req, res, next) {
   console.log("------ req.body -------", req.body);
