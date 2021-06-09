@@ -28,14 +28,14 @@ async function init() {
         body: {
             mappings: {
                 properties: {
-                id: { type: 'string' },
-                title: { type: 'string' },
+                id: { type: 'text' },
+                title: { type: 'text' },
                 ration: { type: 'Numbers' },
                 description: { type: 'text' },
                 cooking_time: { type: 'Numbers'},
-                avatar: { type: 'string'},
-                status: { type: 'string'},
-                user_id: { type: 'string'},
+                avatar: { type: 'text'},
+                status: { type: 'text'},
+                user_id: { type: 'text'},
                 steps: { type: 'nested'},
                 ingredients: { type: 'nested'},
                 ingredients_name: { type: 'nested'},
