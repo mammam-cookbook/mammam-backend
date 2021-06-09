@@ -42,7 +42,7 @@ async function init() {
                 hashtags: { type: 'nested'},
                 createdAt: { type: 'date'},
                 updatedAt: { type: 'date'},
-                author: { ype: 'nested'},
+                author: { type: 'nested'},
                 categories: { type: 'nested', index: "not_analyzed"},
                 reactions: { type: 'nested'},
                 comments: { type: 'nested' },
@@ -80,7 +80,7 @@ async function init() {
       const a = await esclient.count({ index: 'recipes' })
       console.log("Number of documents in dex:", a)
     } else {
-      await esclient.indices.putMapping(recipeIndex)
+      await esclient.indices.create(recipeIndex)
     }
   } catch (error) {
     console.log(`--------- init ------`, error.message)
