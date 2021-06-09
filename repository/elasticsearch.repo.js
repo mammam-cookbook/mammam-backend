@@ -30,9 +30,9 @@ async function init() {
                 properties: {
                 id: { type: 'text' },
                 title: { type: 'text' },
-                ration: { type: 'Numbers' },
+                ration: { type: 'integer' },
                 description: { type: 'text' },
-                cooking_time: { type: 'Numbers'},
+                cooking_time: { type: 'integer'},
                 avatar: { type: 'text'},
                 status: { type: 'text'},
                 user_id: { type: 'text'},
@@ -46,7 +46,7 @@ async function init() {
                 categories: { type: 'nested', index: "not_analyzed"},
                 reactions: { type: 'nested'},
                 comments: { type: 'nested' },
-                countReaction: { type: 'Numbers'}
+                countReaction: { type: 'integer'}
             }
         }
       }
