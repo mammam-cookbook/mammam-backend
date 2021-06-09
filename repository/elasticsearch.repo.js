@@ -43,7 +43,7 @@ async function init() {
                 createdAt: { type: 'date'},
                 updatedAt: { type: 'date'},
                 author: { type: 'nested'},
-                categories: { type: 'nested', index: "not_analyzed"},
+                categories: { type: 'nested'},
                 reactions: { type: 'nested'},
                 comments: { type: 'nested' },
                 countReaction: { type: 'integer'}
