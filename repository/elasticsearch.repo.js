@@ -13,6 +13,7 @@ async function createIndex(index) {
 }
 
 async function init() {
+  try {
     esclient.indices.delete({
       index: 'recipes',
     }).then(function(resp) {
@@ -57,26 +58,34 @@ async function init() {
       categories: doc.categories.map(category => category.category_id),
       countReaction: doc.reactions.length
     }])
-    const { body: bulkResponse } = await esclient.bulk({ refresh: true, body })
+    if (recipeList.length > 0) {
+      const { body: bulkResponse } = await esclient.bulk({ refresh: true, body })
 
-    if (_.get(bulkResponse, 'errors')) {
-      const erroredDocuments = []
-      bulkResponse.items.forEach((action, i) => {
-        const operation = Object.keys(action)[0]
-        if (action[operation].error) {
-          erroredDocuments.push({
-            status: action[operation].status,
-            error: action[operation].error,
-            operation: body[i * 2],
-            document: body[i * 2 + 1]
-          })
-        }
-      })
-      console.log(erroredDocuments)
+      if (_.get(bulkResponse, 'errors')) {
+        const erroredDocuments = []
+        bulkResponse.items.forEach((action, i) => {
+          const operation = Object.keys(action)[0]
+          if (action[operation].error) {
+            erroredDocuments.push({
+              status: action[operation].status,
+              error: action[operation].error,
+              operation: body[i * 2],
+              document: body[i * 2 + 1]
+            })
+          }
+        })
+        console.log(erroredDocuments)
+      }
+    
+      const a = await esclient.count({ index: 'recipes' })
+      console.log("Number of documents in dex:", a)
+    } else {
+      await esclient.indices.putMapping(recipeIndex)
     }
-  
-    const a = await esclient.count({ index: 'recipes' })
-    console.log("Number of documents in dex:", a)
+  } catch (error) {
+    console.log(`--------- init ------`, error.message)
+  }
+    
 }
 
 function checkConnection() {
