@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/mammam-cookbook/mammam-backend#readme",
   "dependencies": {
+    "@googleapis/analytics": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "bluebird": "^3.7.2",
     "chai": "^4.3.4",
