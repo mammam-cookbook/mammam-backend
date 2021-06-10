@@ -64,6 +64,7 @@ async function getById(id) {
         include: [
           { 
             model: models.User,
+            attributes: ['id', 'name', 'avatar_url', 'email'],
             as: 'user'
           }
         ]
@@ -74,6 +75,7 @@ async function getById(id) {
         include: [
           { 
             model: models.User,
+            attributes: ['id', 'name', 'avatar_url', 'email'],
             as: 'following'
           }
         ]

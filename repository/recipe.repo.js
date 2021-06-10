@@ -243,6 +243,7 @@ async function filter({ search, limit = 10, offset = 0, categories, hashtag, ing
     include: [
       {
         model: models.User,
+        attributes: ['id', 'name', 'avatar_url', 'email'],
         as: 'author',
       },
       {

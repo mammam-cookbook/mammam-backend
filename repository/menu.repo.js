@@ -52,7 +52,8 @@ async function getRecipesBetweenTwoDates(start, end, user_id) {
           },
           {
             model: models.User,
-            as: 'user'
+            as: 'user',
+            attributes: ['id', 'name', 'avatar_url', 'email']
           }
         ]
     })
