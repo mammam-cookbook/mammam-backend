@@ -17,6 +17,7 @@ async function getAll(type, user_id) {
     const followings = await followRepo.getFollowings(user_id);
     const followingIds = followings.map(item => item.following_id);
     where = {
+      status: 'Approved',
       user_id: {
         [Op.in]: followingIds
       }
@@ -92,6 +93,9 @@ async function getAll(type, user_id) {
 
 async function getAllForElasticSearch() {
   return await Recipe.findAll({
+    where: {
+      status: 'Approved'
+    },
     include: [
       {
         model: models.User,
@@ -425,10 +429,12 @@ async function remove(id, user_id) {
   }
 }
 
-async function getRecipeFromUser(user_id)
+async function getRecipeFromUser(user_id, isMine)
 {
+  const extraWhere = !isMine ? { status: 'Approved' } : {};
   return await Recipe.findAll({ 
     where: {
+      ...extraWhere,
       user_id: {
         [Op.eq]: user_id
       }

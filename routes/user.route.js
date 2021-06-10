@@ -9,6 +9,7 @@ const notificationRepo = require("../repository/notification.repo");
 
 const recipeRepo = require("../repository/recipe.repo");
 const authorize = require("../middlewares/authorize");
+const getUserId = require("../middlewares/getUserId");
 
 router.get('/', async (req, res) => {
   const {keyword, limit, offset} = req.query;
@@ -121,10 +122,11 @@ router.post("/:id/unfollow/:following_id", async (req, res) => {
   }
 })
 
-router.get("/:id/recipe", async (req, res) => {
+router.get("/:id/recipe", getUserId, async (req, res) => {
   const {id} = req.params;
+  const isMine = id === req.userId;
   try {
-    const recipes = await recipeRepo.getRecipeFromUser(id);
+    const recipes = await recipeRepo.getRecipeFromUser(id, isMine);
     return res.status(200).json({
       recipes
     })

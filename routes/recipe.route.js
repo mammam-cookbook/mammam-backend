@@ -71,6 +71,30 @@ router.post("/",authorize, async function (req, res) {
   }
 });
 
+router.post("/draft",authorize, async function (req, res) {
+  const recipe = req.body;
+  const { categories } = recipe;
+  Object.assign(recipe, { user_id : req.user.id, status: 'Pending' })
+  const createdRecipe = await recipeRepo.create(recipe);
+  if (createdRecipe) {
+    try {
+      if (categories && categories.length > 0) {
+        await Promise.all( await categories.map(category => categoryRecipeRepo.create({ recipe_id: createdRecipe.id, category_id: category })));
+      }
+      res.status(200).json({
+        result: 1,
+        recipe: createdRecipe
+      });
+    } catch (error) {
+      res.status(400).json({
+        result: 0,
+        message: error.message
+      })
+    }
+  }
+});
+
+
 router.get("/:id", getUserId, async (req, res) => {
   const { userId, user } = req;
   const recipe = await recipeRepo.getById(req.params.id);

@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
             status: {
                 type: DataTypes.ENUM('Pending', 'Approved'),
                 allowNull: false,
+                defaultValue: 'Approved'
             },
             level: {
                 type: DataTypes.ENUM('easy', 'medium', 'hard')
