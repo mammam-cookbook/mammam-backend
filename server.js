@@ -90,9 +90,9 @@ app.use("/api/notification", require("./routes/notification.route"));
 app.use("/api/upvote", require("./routes/upvote.route"));
 app.use("/api/challenge", require("./routes/challenge.route"));
 app.use("/api/admin", require("./routes/admin.route"));
+app.use("/api/googleAnalytics", require("./routes/googleAnalytics.route"));
 
 app.use(function (req, res, next) {
-  console.log("------ req.body -------", req.body);
   res.status(404).send({
     message: "Resource not found!",
   });

@@ -1,7 +1,7 @@
-const logger = require('../infra/logger')
 const { analytics } = require('@googleapis/analytics')
 const { jwt } = require('../utils/googleAuthentication')
-const { GA_VIEW_ID } = require('../config')
+require("dotenv").config();
+const { GA_VIEW_ID } = process.env
 
 async function authenticate() {
   await jwt.authorize()
@@ -21,7 +21,7 @@ async function getActiveUsers() {
     const activeUsers = data.totalsForAllResults['rt:activeUsers']
     return Number(activeUsers)
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -36,7 +36,7 @@ async function getActiveUserLocaltions() {
     const rows = data.rows || []
     return rows.map(location => [location[0], Number(location[1])])
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -51,7 +51,7 @@ async function getActiveUserPageTrackingData() {
     const rows = data.rows || []
     return rows.map(path => [path[0], Number(path[1])])
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -69,7 +69,7 @@ async function getActiveUserDeviceCategory() {
       Number(deviceCategory[1])
     ])
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -85,7 +85,7 @@ async function getVisitors(startDate, endDate) {
     const sessions = data.totalsForAllResults['ga:sessions']
     return Number(sessions)
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -101,7 +101,7 @@ async function getUniqueVisitors(startDate, endDate) {
     const sessions = data.totalsForAllResults['ga:users']
     return Number(sessions)
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -120,7 +120,7 @@ async function getVisitorLocation(startDate, endDate) {
       return { country: location[0], number: Number(location[1]) }
     })
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -139,7 +139,7 @@ async function getUniqueVisitorLocation(startDate, endDate) {
       return { country: location[0], number: Number(location[1]) }
     })
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -159,7 +159,7 @@ async function getVisitorTrafficSource(startDate, endDate) {
       Number(trafficSource[1])
     ])
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -176,7 +176,7 @@ async function getUsedBrowser(startDate, endDate) {
     const rows = data.rows || 0
     return rows.map(browser => [browser[0], Number(browser[1])])
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -192,7 +192,7 @@ async function getAvrEngagementTime(startDate, endDate) {
     const avrEngagementTime = data.totalsForAllResults['ga:avgSessionDuration']
     return Number(avrEngagementTime)
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
@@ -209,7 +209,7 @@ async function getPageTrackingData(startDate, endDate) {
     const rows = data.rows || []
     return rows.map(path => [path[0], Number(path[1])])
   } catch (error) {
-    logger.info(error.message)
+    console.log(error.message)
   }
 }
 
