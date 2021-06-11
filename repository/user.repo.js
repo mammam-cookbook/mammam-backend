@@ -299,6 +299,26 @@ async function checkIfBanned(user_id)
   }
 }
 
+async function findFacebookUser(email)
+{
+  return await User.findOne({
+    where: {
+      email: email,
+      auth: 'Facebook'
+    }
+  });
+}
+
+async function findGoogleUser(email)
+{
+  return await User.findOne({
+    where: {
+      email: email,
+      auth: 'Google'
+    }
+  });
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -317,5 +337,7 @@ module.exports = {
   banUser,
   unbanUser,
   checkIfBanned,
-  getEmailById
+  getEmailById,
+  findFacebookUser,
+  findGoogleUser
 };

@@ -75,6 +75,136 @@ router.post("/", async function (req, res) {
   }
 });
 
+router.post("/facebook", async function (req, res) {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = req.body; 
+  var findUser = await userRepo.findFacebookUser(user.email);
+  var existed = false;
+
+  if (!findUser) //this is the first time user log in with facebook
+  {
+    const createdUser = await userRepo.create(user);
+    if (createdUser) { 
+      existed = true;
+    }
+  }
+  
+  if (findUser || existed) { 
+    if (existed) {
+      findUser = await userRepo.findFacebookUser(user.email);
+    }
+    const IsBanned = await userRepo.checkIfBanned(findUser.id);
+    if (IsBanned === true) {
+      return res.status(400).json({
+        err: "User is currently banned",
+      });
+    }
+    if (!userRepo.comparePassword(password, findUser.password)) {
+      return res.status(400).json({
+        err: "Password is wrong!!!",
+      });
+    }
+    const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+    // set refresh token to redis
+    const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
+      expiresIn: "2d"
+    });
+    const { exp: tokenExp } = verifyToken(token);
+    const { exp: refreshTokenExp } = verifyToken(refreshToken);
+    const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    const isSetExpire = redis.expire(
+      refreshToken,
+      60*60*24*2
+    );
+    if (isSet && isSetExpire ) {
+      console.log('---------- Save redis successfully! ----------');
+    } else {
+      return res.status(400).json({
+        result: 0,
+        message: 'Save redis failed'
+      })
+    }
+
+    res.cookie("token", token, { expiresIn: "1d" });
+    const { id, name, email, role, avatar_url } = findUser;
+    return res.status(200).json({
+      token,
+      refreshToken,
+      tokenExp,
+      refreshTokenExp,
+      user: { id, name, email, role, avatar_url },
+    });
+  }
+});
+
+router.post("/google", async function (req, res) {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = req.body; 
+  var findUser = await userRepo.findGoogleUser(user.email);
+  var existed = false;
+
+  if (!findUser) //this is the first time user log in with facebook
+  {
+    const createdUser = await userRepo.create(user);
+    if (createdUser) { 
+      existed = true;
+    }
+  }
+  
+  if (findUser || existed) { 
+    if (existed) {
+      findUser = await userRepo.findGoogleUser(user.email);
+    }
+    const IsBanned = await userRepo.checkIfBanned(findUser.id);
+    if (IsBanned === true) {
+      return res.status(400).json({
+        err: "User is currently banned",
+      });
+    }
+    if (!userRepo.comparePassword(password, findUser.password)) {
+      return res.status(400).json({
+        err: "Password is wrong!!!",
+      });
+    }
+    const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+    // set refresh token to redis
+    const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
+      expiresIn: "2d"
+    });
+    const { exp: tokenExp } = verifyToken(token);
+    const { exp: refreshTokenExp } = verifyToken(refreshToken);
+    const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    const isSetExpire = redis.expire(
+      refreshToken,
+      60*60*24*2
+    );
+    if (isSet && isSetExpire ) {
+      console.log('---------- Save redis successfully! ----------');
+    } else {
+      return res.status(400).json({
+        result: 0,
+        message: 'Save redis failed'
+      })
+    }
+
+    res.cookie("token", token, { expiresIn: "1d" });
+    const { id, name, email, role, avatar_url } = findUser;
+    return res.status(200).json({
+      token,
+      refreshToken,
+      tokenExp,
+      refreshTokenExp,
+      user: { id, name, email, role, avatar_url },
+    });
+  }
+});
+
 router.post("/forgot-password", async (req, res) => {
   crypto.randomBytes(32, async (err, buffer) => {
     if (err) {
