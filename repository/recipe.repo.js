@@ -394,7 +394,20 @@ async function getById(id) {
         model: models.Reaction,
         as: 'reactions',
         attributes: ['id', 'react'],
-      }
+      },
+      {
+        model: models.Comment,
+        as: 'comments',
+        raw: true,
+        attributes: ['id', 'images', 'content', 'parent_comment_id', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      },
     ]
   });
 }
