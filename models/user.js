@@ -56,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
                 defaultValue: 'bronze'
             },
+            auth: {
+                type: DataTypes.ENUM('Facebook', 'Google'),
+                allowNull: true
+            }
         },
         {
             tableName: "user",
