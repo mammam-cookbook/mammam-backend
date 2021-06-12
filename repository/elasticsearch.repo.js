@@ -14,14 +14,6 @@ async function createIndex(index) {
 
 async function init() {
   try {
-    esclient.indices.delete({
-      index: 'recipes',
-    }).then(function(resp) {
-      console.log("Successful query!");
-      console.log(JSON.stringify(resp, null, 4));
-    }, function(err) {
-      console.trace(err.message);
-    });
     let recipeList = await recipeRepo.getAllForElasticSearch();
     const recipeIndex = {
         index: 'recipes',
@@ -51,16 +43,30 @@ async function init() {
         }
       }
     }
-
-    await createIndex(recipeIndex)
+    
+    const isExist = await isElasticIndexExist('recipes')
+    console.log({ isExist })
+    if (isExist) {
+      await esclient.indices.delete({
+        index: 'recipes',
+      }).then(function(resp) {
+        console.log("Successful query!");
+        console.log(JSON.stringify(resp, null, 4));
+      }, function(err) {
+        console.trace(err.message);
+      });
+    } else {
+      const createdIndex = await createIndex(recipeIndex)
+      console.log({ createdIndex })
+    }
     recipeList = recipeList.map(recipe => recipe.dataValues)
     const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, {...doc, 
       categories: doc.categories.map(category => category.category_id),
       countReaction: doc.reactions.length
     }])
+    console.log({ recipeList })
     if (recipeList.length > 0) {
       const { body: bulkResponse } = await esclient.bulk({ refresh: true, body })
-
       if (_.get(bulkResponse, 'errors')) {
         const erroredDocuments = []
         bulkResponse.items.forEach((action, i) => {
