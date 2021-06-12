@@ -14,4 +14,16 @@ router.post("/",authorize, async function (req, res) {
     }
 });
 
+router.delete("/",authorize, async function (req, res) {
+  const id = req.body.id;
+  const deletedReaction = await reactionRepo.remove(id, req.user.id);
+  if (deletedReaction) {
+    res.status(200).json({
+      result: 1,
+      reaction: deletedReaction
+    });
+  }
+});
+
+
 module.exports = router;

@@ -86,6 +86,18 @@ async function getAll(type, user_id) {
             attributes: ['id', 'name', 'avatar_url', 'email']
           }
         ]
+      },
+      {
+        model: models.Challenge,
+        as: 'challenges',
+        attributes: ['id', 'images', 'content'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
       }
     ]
   });
@@ -415,6 +427,18 @@ async function getById(id) {
           }
         ]
       },
+      {
+        model: models.Challenge,
+        as: 'challenges',
+        attributes: ['id', 'images', 'content'],
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      }
     ]
   });
 }
@@ -498,6 +522,18 @@ async function getRecipeFromUser(user_id, isMine)
         include: [
           {
             model: models.User, 
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url', 'email']
+          }
+        ]
+      },
+      {
+        model: models.Challenge,
+        as: 'challenges',
+        attributes: ['id', 'images', 'content'],
+        include: [
+          {
+            model: models.User,
             as: 'author',
             attributes: ['id', 'name', 'avatar_url', 'email']
           }

@@ -121,21 +121,21 @@ async function checkReaction(user_id, recipe_id) {
 
 
 async function remove(id, user_id) {
-    // const reaction = await getById(id);
-    // if (!reaction) {
-    //     throw new Error('Reaction not found!')
-    // } else {
-    //   const author = reaction.user_id;
-    //   if (author !== user_id) {
-    //     throw new Error('User has no permission!')
-    //   } else {
-    //     return await Reaction.destroy({
-    //       where: {
-    //         id: id,
-    //       },
-    //     });
-    //   }
-    // }
+    const reaction = await getById(id); 
+    if (!reaction) {
+        throw new Error('Reaction not found!')
+    } else {
+      const author = reaction.dataValues.user_id;
+      if (author !== user_id) {
+        throw new Error('User has no permission!')
+      } else {
+        return await Reaction.destroy({
+          where: {
+            id: id,
+          },
+        });
+      }
+    }
 }
 
 module.exports = {
