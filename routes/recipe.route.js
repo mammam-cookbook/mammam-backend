@@ -57,7 +57,18 @@ router.post("/",authorize, async function (req, res) {
   if (createdRecipe) {
     try {
       await Promise.all( await categories.map(category => categoryRecipeRepo.create({ recipe_id: createdRecipe.id, category_id: category })));
-      await elasticRepo.updateIndexDoc('recipes', createdRecipe.id, {...createdRecipe, countReaction: 0, categories })
+      await elasticRepo.updateIndexDoc('recipes', createdRecipe.id, 
+      {
+        ...createdRecipe,
+        countReaction: 0,
+        categories,
+        author: { 
+          id: req.user.id,
+          name: req.user.name,
+          avatar_url: req.user.avatar_url,
+          email: req.user.email
+        } 
+      })
       res.status(200).json({
         result: 1,
         recipe: createdRecipe
