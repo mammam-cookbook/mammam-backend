@@ -19,6 +19,7 @@ function verifyToken(token) {
       return decoded;
   });
 }
+
 router.post("/", async function (req, res) {
   const { email, password } = req.body;
   const findUser = await userRepo.getByEmail(email);
@@ -61,6 +62,11 @@ router.post("/", async function (req, res) {
         result: 0,
         message: 'Save redis failed'
       })
+    }
+
+    if (req.body.token !== "")
+    {
+      const addtoken = await userRepo.updateDeviceToken(req.body.token, findUser.id);
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
@@ -128,6 +134,11 @@ router.post("/facebook", async function (req, res) {
       })
     }
 
+    if (req.body.token !== "")
+    {
+      const addtoken = await userRepo.updateDeviceToken(req.body.token, findUser.id);
+    }
+
     res.cookie("token", token, { expiresIn: "1d" });
     const { id, name, email, role, avatar_url } = findUser;
     return res.status(200).json({
@@ -191,6 +202,11 @@ router.post("/google", async function (req, res) {
         result: 0,
         message: 'Save redis failed'
       })
+    }
+
+    if (req.body.token !== "")
+    {
+      const addtoken = await userRepo.updateDeviceToken(req.body.token, findUser.id);
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
