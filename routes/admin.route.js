@@ -12,6 +12,8 @@ const permitRole = require("../middlewares/permitRole");
 const recipeRepo = require("../repository/recipe.repo");
 const authorize = require("../middlewares/authorize");
 
+const sendNoti = require("../utils/sendNotification");
+
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0; //for dev only, delete on production
 
 router.post("/ban", authorize, permitRole('admin'), async function (req, res) {
@@ -49,6 +51,69 @@ router.delete("/user", authorize, permitRole('admin'), async function (req, res)
     res.status(200).json({
       result: 1,
       userDeleted: userDeleted
+    });
+  }
+});
+
+router.post("/noti", async function (req, res) {
+  const registrationToken = req.body.token;  
+  let notification = {
+    title: req.body.title,
+    body: req.body.text
+  }
+  const message = {
+    notification: notification,
+    token: registrationToken
+  };
+
+  sendNoti.sendToOne(message);
+
+  if (true) {
+    res.status(200).json({
+      result: 1,
+    });
+  }
+});
+
+router.post("/notis", async function (req, res) {
+  const registrationToken = req.body.token;  
+  let notification = {
+    title: req.body.title,
+    body: req.body.text
+  }
+  const message = {
+    notification: notification,
+    tokens: registrationToken
+  };
+
+  sendNoti.sendToMultiple(message);
+
+  if (true) {
+    res.status(200).json({
+      result: 1,
+    });
+  }
+});
+
+router.post("/notiall", async function (req, res) {
+  let notification = {
+    title: req.body.title,
+    body: req.body.text
+  }
+  const result = await userRepo.sendNotificationToAll(notification);
+  if (result) {
+    res.status(200).json({
+      result: 1,
+    });
+  }
+});
+
+router.delete("/token", async function (req, res) {
+  const user_id = req.body.user_id;
+  const result = await userRepo.updateDeviceToken(null, user_id);
+  if (result) {
+    res.status(200).json({
+      result: 1,
     });
   }
 });

@@ -59,6 +59,10 @@ module.exports = (sequelize, DataTypes) => {
             auth: {
                 type: DataTypes.ENUM('Facebook', 'Google'),
                 allowNull: true
+            },
+            device_token: {
+                type: DataTypes.STRING,
+                allowNull: true
             }
         },
         {
