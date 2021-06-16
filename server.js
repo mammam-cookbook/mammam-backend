@@ -3,6 +3,8 @@ const socket_io = require("socket.io");
 const jwt = require("jsonwebtoken");
 var cron = require('node-cron');
 const esclient = require('./repository/elasticsearch.repo');
+const menuReminder = require('./cronJobs/menuReminder')
+
 const app = express();
 require("dotenv").config();
 //Log request
@@ -18,11 +20,13 @@ const io = socket_io();
 app.io = io;
 
 app.set("socketio", io);
-
-var task = cron.schedule('* * * * *', () =>  {
-  // console.log('stopped task');
+// '0 10,16,21 * * *'
+var task = cron.schedule('*/1 * * * *', () => {
+  console.log('Runing a job at 10am,4pm and 9pm at  Asia/Bangkok timezone');
+  menuReminder.remindRecipeInMenu();
 }, {
-  scheduled: false
+  scheduled: true,
+  timezone: "Asia/Bangkok"
 });
 
 task.start();
@@ -62,6 +66,7 @@ io.use((socket, next) => {
 
 //Use body parser
 let bodyParser = require("body-parser");
+const { remindRecipeInMenu } = require("./cronJobs/menuReminder");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
 

@@ -9,7 +9,7 @@ async function getRecipesBetweenTwoDates(start, end, user_id) {
     console.log({ start, end})
     return Menu.findAll({
         where: {
-            date: {
+            timestamp: {
                 [Op.between]: [start, end]
             },
             user_id
@@ -79,12 +79,21 @@ async function getById(id) {
     })
 }
 
-async function findRecipeInMenu(user_id, recipe_id, date, session) {
+async function findRecipeInMenu(user_id, recipe_id, timestamp, session) {
   return Menu.findOne({
     where: {
       user_id,
       recipe_id,
-      date,
+      timestamp,
+      session
+    }
+  })
+}
+
+async function findRecipeInSession(timestamp, session) {
+  return Menu.findAll({
+    where: {
+      timestamp,
       session
     }
   })
@@ -114,5 +123,6 @@ module.exports = {
   update,
   remove,
   getRecipesBetweenTwoDates,
-  findRecipeInMenu
+  findRecipeInMenu,
+  findRecipeInSession
 };
