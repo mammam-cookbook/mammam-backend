@@ -10,6 +10,7 @@ const notificationRepo = require("../repository/notification.repo");
 const recipeRepo = require("../repository/recipe.repo");
 const authorize = require("../middlewares/authorize");
 const getUserId = require("../middlewares/getUserId");
+const { trimStart } = require("lodash");
 
 router.get('/', async (req, res) => {
   const {keyword, limit, offset} = req.query;
@@ -110,6 +111,12 @@ router.get("/:id/following", async(req, res) => {
 router.post("/:id/unfollow/:following_id", async (req, res) => {
   const { id, following_id} = req.params;
   const followData = { user_id: id, following_id};
+  if (id === following_id) {
+    return res.status(400).json({
+      result: 0,
+      message: 'Cant not follow yourself'
+    })
+  }
   try {
     const follow = await followRepo.remove(followData);
     if (follow === 1){

@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: false
             },
             type: {
-                type: DataTypes.ENUM('comment', 'like', 'follow', 'reply'),
+                type: DataTypes.ENUM('comment', 'like', 'follow', 'reply', 'remind'),
                 allowNull: false
             },
             recipe_id: {
