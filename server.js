@@ -21,7 +21,7 @@ app.io = io;
 
 app.set("socketio", io);
 // '0 10,16,21 * * *'
-var task = cron.schedule('*/5 * * * *', () => {
+var task = cron.schedule('*/1 * * * *', () => {
   console.log('Runing a job at 10am,4pm and 9pm at  Asia/Bangkok timezone');
   menuReminder.remindRecipeInMenu();
 }, {

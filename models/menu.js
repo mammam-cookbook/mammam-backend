@@ -27,8 +27,8 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: 'cascade',
                 onDelete: 'cascade'
             },
-            date: {
-                type: DataTypes.DATE,
+            timestamp: {
+                type: DataTypes.INTEGER,
                 allowNull: false
             },
             session: {
