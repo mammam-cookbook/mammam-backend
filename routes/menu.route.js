@@ -20,9 +20,8 @@ router.post("/",authorize, permitRole('user'),async function (req, res) {
     try {
         const menu = req.body;
         Object.assign(menu, { user_id : req.user.id})
-        const {user_id, recipe_id, date, session} = menu;
-        const findDuplicate = await menuRepo.findRecipeInMenu(user_id, recipe_id, date, session);
-        console.log('-------- find duplicate ----------', findDuplicate)
+        const {user_id, recipe_id, timestamp, session} = menu;
+        const findDuplicate = await menuRepo.findRecipeInMenu(user_id, recipe_id, timestamp, session);
         if (findDuplicate) {
           return res.status(400).json({
             result: 0,

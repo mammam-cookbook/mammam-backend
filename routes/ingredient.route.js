@@ -24,11 +24,18 @@ router.get("/", (req, res) => {
   }
 
   const language = req.headers["accept-language"] || "vi";
-  const first = nonAccentVietnamese(search.charAt(0));
 
-  const ingres = require(`./../utils/ingredient/${first}_${language}.json`);
+  const ingres = require(`./../utils/ingredient/ingredients_${language}.json`);
+  let data = [];
+  ingres.forEach((item) => {
+    if (item.name === search) {
+      data.unshift(item);
+    } else if (item.name.includes(search)) {
+      data.push(item);
+    }
+  });
   return res.status(200).json({
-    data: ingres.filter((item) => item.name.includes(search)),
+    data,
   });
 });
 

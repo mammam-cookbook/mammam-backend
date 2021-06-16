@@ -1,6 +1,9 @@
 const express = require("express");
 const socket_io = require("socket.io");
 const jwt = require("jsonwebtoken");
+var cron = require('node-cron');
+const esclient = require('./repository/elasticsearch.repo');
+const menuReminder = require('./cronJobs/menuReminder')
 
 const app = express();
 require("dotenv").config();
@@ -17,6 +20,16 @@ const io = socket_io();
 app.io = io;
 
 app.set("socketio", io);
+// '0 10,16,21 * * *'
+var task = cron.schedule('*/1 * * * *', () => {
+  console.log('Runing a job at 10am,4pm and 9pm at  Asia/Bangkok timezone');
+  menuReminder.remindRecipeInMenu();
+}, {
+  scheduled: true,
+  timezone: "Asia/Bangkok"
+});
+
+task.start();
 
 io.use((socket, next) => {
   if (socket.handshake.query && socket.handshake.query.token) {
@@ -53,10 +66,21 @@ io.use((socket, next) => {
 
 //Use body parser
 let bodyParser = require("body-parser");
+const { remindRecipeInMenu } = require("./cronJobs/menuReminder");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
 
+esclient.checkConnection().then(data => {
+  if (data) {
+    esclient.init();
+  }
+});
 //Config route
+app.get('/', (req, res) => {
+  res.status(200).send({
+    message: "Welcome to MAM API!",
+  });
+})
 app.use("/api/auth", require("./routes/auth.route"));
 app.use("/api/user", require("./routes/user.route"));
 app.use("/api/recipe", require("./routes/recipe.route"));
@@ -68,6 +92,11 @@ app.use("/api/ingredient", require("./routes/ingredient.route"));
 app.use("/api/shopinglist", require("./routes/shoping.route"));
 app.use("/api/menu", require("./routes/menu.route"));
 app.use("/api/notification", require("./routes/notification.route"));
+app.use("/api/upvote", require("./routes/upvote.route"));
+app.use("/api/challenge", require("./routes/challenge.route"));
+app.use("/api/problem", require("./routes/problem.route"));
+app.use("/api/report", require("./routes/report.route"));
+app.use("/api/admin", require("./routes/admin.route"));
 
 app.use(function (req, res, next) {
   console.log("------ req.body -------", req.body);
@@ -81,7 +110,7 @@ app.use(function (err, req, res, next) {
   res.status(500).send("Something broke!");
 });
 const port = process.env.PORT || 3001;
-app.listen(3001, () => {
+app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 

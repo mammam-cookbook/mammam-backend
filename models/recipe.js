@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
             status: {
                 type: DataTypes.ENUM('Pending', 'Approved'),
                 allowNull: false,
+                defaultValue: 'Approved'
             },
             level: {
                 type: DataTypes.ENUM('easy', 'medium', 'hard')
@@ -61,7 +62,11 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: "recipe_id",
             as: "comments"
         });
-        Recipe.comments = Recipe.hasMany(models.Reaction, {
+        Recipe.challenges = Recipe.hasMany(models.Challenge, {
+            foreignKey: "recipe_id",
+            as: "challenges"
+        })
+        Recipe.reactions = Recipe.hasMany(models.Reaction, {
             foreignKey: "recipe_id",
             as: "reactions"
 

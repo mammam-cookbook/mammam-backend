@@ -29,7 +29,7 @@ async function remove(id, user_id) {
     if (!category) {
         throw new Error('Category not found!')
     } else {
-        return await Comment.destroy({
+        return await Category.destroy({
           where: {
             id: id,
           },

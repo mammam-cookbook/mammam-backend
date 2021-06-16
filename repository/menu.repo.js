@@ -9,7 +9,7 @@ async function getRecipesBetweenTwoDates(start, end, user_id) {
     console.log({ start, end})
     return Menu.findAll({
         where: {
-            date: {
+            timestamp: {
                 [Op.between]: [start, end]
             },
             user_id
@@ -17,7 +17,43 @@ async function getRecipesBetweenTwoDates(start, end, user_id) {
         include: [
           {
             model: models.Recipe,
-            as: 'recipe'
+            as: 'recipe',
+            include: [
+              {
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name', 'avatar_url', 'email'],
+              },
+              {
+                model: models.CategoryRecipe,
+                as: 'categories',
+                attributes: ['id'],
+                include: [
+                  {
+                    model:  models.Category,
+                    as: 'category',
+                    attributes: ['id', 'en', 'vi']
+                  }
+                ]
+              },
+              {
+                model: models.Reaction,
+                as: 'reactions',
+                attributes: ['id', 'react'],
+                include: [
+                  {
+                    model: models.User, 
+                    as: 'author',
+                    attributes: ['id', 'name', 'avatar_url', 'email']
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: models.User,
+            as: 'user',
+            attributes: ['id', 'name', 'avatar_url', 'email']
           }
         ]
     })
@@ -43,12 +79,21 @@ async function getById(id) {
     })
 }
 
-async function findRecipeInMenu(user_id, recipe_id, date, session) {
+async function findRecipeInMenu(user_id, recipe_id, timestamp, session) {
   return Menu.findOne({
     where: {
       user_id,
       recipe_id,
-      date,
+      timestamp,
+      session
+    }
+  })
+}
+
+async function findRecipeInSession(timestamp, session) {
+  return Menu.findAll({
+    where: {
+      timestamp,
       session
     }
   })
@@ -78,5 +123,6 @@ module.exports = {
   update,
   remove,
   getRecipesBetweenTwoDates,
-  findRecipeInMenu
+  findRecipeInMenu,
+  findRecipeInSession
 };

@@ -50,7 +50,8 @@ async function getById(id) {
         include: [
             {
                 model: models.User,
-                as: 'user'
+                attributes: ['id', 'name', 'avatar_url', 'email'],
+                as: 'author'
             }
         ]
     });

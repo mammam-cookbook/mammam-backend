@@ -51,6 +51,24 @@ module.exports = (sequelize, DataTypes) => {
             },
             allergies : DataTypes.ARRAY(DataTypes.STRING),
             disliked_ingredients : DataTypes.ARRAY(DataTypes.STRING),
+            point: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                defaultValue: 0
+            },
+            rank: {
+                type: DataTypes.ENUM('bronze', 'silver', 'gold', 'diamond'),
+                allowNull: true,
+                defaultValue: 'bronze'
+            },
+            auth: {
+                type: DataTypes.ENUM('Facebook', 'Google'),
+                allowNull: true
+            },
+            device_token: {
+                type: DataTypes.STRING,
+                allowNull: true
+            }
         },
         {
             tableName: "user",

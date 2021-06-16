@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: 'cascade',
                 onDelete: 'cascade'
             },
+            ration: DataTypes.INTEGER
         },
         {
             tableName: "shopingList",
