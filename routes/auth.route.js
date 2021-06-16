@@ -10,6 +10,7 @@ const authorization = require("../middlewares/authorize");
 const bcrypt = require("bcryptjs");
 const redis = require('../utils/caching');
 const authorize = require("../middlewares/authorize");
+const { access } = require("fs");
 
 function verifyToken(token) {
   return jwt.verify(token,process.env.JWT_SECRET, (err, decoded) => {
@@ -50,12 +51,17 @@ router.post("/", async function (req, res) {
     });
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
+    const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
+    const isSetExpireAccessToken = redis.expire(
+      token,
+      60*60*24
+    );
     const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
     const isSetExpire = redis.expire(
       refreshToken,
       60*60*24*2
     );
-    if (isSet && isSetExpire ) {
+    if (isSet && isSetExpire && isSetAccessToken && isSetExpireAccessToken ) {
       console.log('---------- Save redis successfully! ----------');
     } else {
       return res.status(400).json({
@@ -363,5 +369,23 @@ router.post("/refresh-token", async (req, res) => {
   return res.status(200).json({
     token
   })
+})
+
+router.post("/logout", authorize, async(req, res) => {
+  try {
+    const {authorization} = req.headers;
+    const { user } = req;
+    const removeToken = await redis.del(authorization)
+    await userRepo.removeDeviceToken(user.id)
+    return res.status(200).json({
+      result: 1,
+      message: 'Logout successfully'
+    })
+  } catch (error) {
+    return res.status(400).json({
+      result: 1,
+      message: error.message
+    })
+  }
 })
 module.exports = router;

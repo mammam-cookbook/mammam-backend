@@ -315,6 +315,14 @@ async function updateDeviceToken(token, user_id) {
   });
 }
 
+async function removeDeviceToken(user_id) {
+  return await User.update({ device_token: null }, {
+    where: {
+      id: user_id,
+    }
+  });
+}
+
 async function sendNotificationToAll(notification) {
   const tokens = await User.findAndCountAll({
     where: {
@@ -365,5 +373,6 @@ module.exports = {
   findFacebookUser,
   findGoogleUser,
   updateDeviceToken,
-  sendNotificationToAll
+  sendNotificationToAll,
+  removeDeviceToken
 };

@@ -4,20 +4,19 @@ var models =require('../models');
 const redis = require('../utils/caching');
 const { getById } = require('../repository/user.repo');
 
-module.exports = (req,res,next) => {
+module.exports = async (req,res,next) => {
   const {authorization} = req.headers;
   if(!authorization){
      return res.status(401).json({error:"jwt must provide"})
   }
   const token = authorization.replace("Bearer ","")
-  jwt.verify(token,process.env.JWT_SECRET,(err,payload)=>{
-      if(err){
-       return   res.status(401).json({error:"you must be logged in"})
-      }
-      const {id} = payload;
-      getById(id).then(userdata=>{
-          req.user = userdata
-          next()
-      })
-  })
+  const stringifyUser = await redis.getAsync(token);
+  console.log({ stringifyUser })
+  if (stringifyUser) {
+    const user = JSON.parse(stringifyUser)
+    req.user = user
+    next()
+  } else {
+    return res.status(401).json({error:"Access Token is invalid"})
+  }
 }
