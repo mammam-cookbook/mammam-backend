@@ -39,6 +39,17 @@ router.get("/", async function (req, res) {
   }
 });
 
+router.get("/rec", async function (req, res) {
+  console.log(req.query);
+  const result = await recipeRepo.RecommendSearch(req.query);
+  console.log({ result })
+  if (result) {
+    res.status(200).json({
+      ...result
+    })
+  }
+});
+
 router.get("/list",getUserId, async function (req, res) {
   const result = await recipeRepo.getAll(req.query.type, req.userId);
   if (result) {
