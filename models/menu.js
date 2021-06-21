@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
             user_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: 'menuConstraintIndex',
                 references: {
                     model: 'user',
                     key: 'id'
@@ -20,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
             recipe_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: 'menuConstraintIndex',
                 references: {
                     model: 'recipe',
                     key: 'id'
@@ -29,11 +31,13 @@ module.exports = (sequelize, DataTypes) => {
             },
             timestamp: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: false,
+                unique: 'menuConstraintIndex',
             },
             session: {
                 type: DataTypes.ENUM('morning', 'noon', 'night'),
-                allowNull: false
+                allowNull: false,
+                unique: 'menuConstraintIndex',
             }
         },
         {

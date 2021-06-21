@@ -117,6 +117,10 @@ async function remove(id, user_id) {
   }
 }
 
+function bulkCreate(menu) {
+  return Menu.bulkCreate(menu)
+}
+
 module.exports = {
   getById,
   create,
@@ -124,5 +128,6 @@ module.exports = {
   remove,
   getRecipesBetweenTwoDates,
   findRecipeInMenu,
-  findRecipeInSession
+  findRecipeInSession,
+  bulkCreate
 };

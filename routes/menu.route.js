@@ -18,17 +18,22 @@ router.get("/", authorize, async function (req, res) {
 
 router.post("/",authorize, permitRole('user'),async function (req, res) {
     try {
-        const menu = req.body;
-        Object.assign(menu, { user_id : req.user.id})
-        const {user_id, recipe_id, timestamp, session} = menu;
-        const findDuplicate = await menuRepo.findRecipeInMenu(user_id, recipe_id, timestamp, session);
-        if (findDuplicate) {
-          return res.status(400).json({
-            result: 0,
-            message: 'Duplicate menu item'
-          })
-        }
-        const createdMenu = await menuRepo.create(menu);
+        const menu = req.body.menu.map((item) => {
+          Object.assign(item, { user_id: req.user.id })
+          return item
+        });
+        console.log({ menu})
+        // Object.assign(menu, { user_id : req.user.id})
+        // const {user_id, recipe_id, timestamp, session} = menu;
+        // const findDuplicate = await menuRepo.findRecipeInMenu(user_id, recipe_id, timestamp, session);
+        // if (findDuplicate) {
+        //   return res.status(400).json({
+        //     result: 0,
+        //     message: 'Duplicate menu item'
+        //   })
+        // }
+        // const createdMenu = await menuRepo.create(menu);
+        const createdMenu = await menuRepo.bulkCreate(menu)
         if (createdMenu) {
           res.status(200).json({
             result: 1,

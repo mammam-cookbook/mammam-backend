@@ -58,6 +58,12 @@ router.get("/:id",async (req, res) => {
 router.post("/:id/follow/:following_id", authorize, async (req, res) => {
   const { id, following_id} = req.params;
   const followData = { user_id: id, following_id};
+  if (id === following_id) {
+    return res.status(400).json({
+      result: 0,
+      message: 'Cant follow yourself!'
+    })
+  }
   try {
     const follow = await followRepo.create(followData);
     const notification = {
