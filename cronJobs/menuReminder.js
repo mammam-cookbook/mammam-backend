@@ -9,9 +9,11 @@ const { sendNotification, remindNotification } = require("../socketHandler/notif
 
 async function pushNotification(menus) {
     await Promise.all(menus.map(async(menu) => {
-        const recipe = await recipeRepo.getById(menu.recipe_id)
-        const user = await userRepo.getById(menu.user_id)
-        const admin = await userRepo.getByEmail('admin@admin.com')
+        const [recipe, user, admin] = await Promise.all([
+            recipeRepo.getById(menu.recipe_id),
+            userRepo.getById(menu.user_id),
+            userRepo.getByEmail('admin@admin.com')
+        ])
         const notification = {
             sender_id: admin.id,
             type: 'remind',
@@ -28,6 +30,7 @@ async function pushNotification(menus) {
             createdAt: createdNotification.createdAt
           }
         remindNotification(notificationData)
+        console.log({ user })
         if (user.device_token) {
             return sendToOne({
                 notification: {
@@ -49,11 +52,12 @@ exports.remindRecipeInMenu = async () => {
     if (hours > 20) {
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'morning')
     } else if (hours < 10) {
-        unixTime = moment().utc().unix()
+        unixTime = moment().utc().startOf('days').unix()
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'noon')
     } else {
-        unixTime = moment().utc().unix()
+        unixTime = moment().utc().startOf('days').unix()
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'night')
     }
+    console.log({ remindRecipes, unixTime })
     pushNotification(remindRecipes)
 }
