@@ -29,7 +29,7 @@ async function pushNotification(menus) {
             recipe: recipe,
             createdAt: createdNotification.createdAt
           }
-        remindNotification(notificationData)
+        // remindNotification(notificationData)
         console.log({ user })
         if (user.device_token) {
             return sendToOne({
