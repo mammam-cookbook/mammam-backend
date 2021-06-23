@@ -16,7 +16,7 @@ async function update(id, notification) {
 async function listNotifications({user_id, limit = 10, offset = 0 }) {
   return Notification.findAndCountAll({
     where: {
-      user_id
+      receiver_id: user_id
     },
     include: [
         {
