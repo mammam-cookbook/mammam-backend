@@ -3,9 +3,9 @@ const userRepo = require("../repository/user.repo");
 const { ban_message } = require("../utils/mail.model");
 const { unban_message } = require("../utils/mail.model");
 const { delete_message } = require("../utils/mail.model");
-const {sendNewEmailProducer} = require("../utils/jobQueue");
 const { route } = require("./auth.route");
 const { sendNotification } = require('../socketHandler/notification.handler')
+const { sendNewEmailProducer } = require("../utils/jobQueue");
 const notificationRepo = require("../repository/notification.repo");
 const permitRole = require("../middlewares/permitRole");
 
@@ -21,7 +21,7 @@ router.post("/ban", authorize, permitRole('admin'), async function (req, res) {
     const createdBan = await userRepo.banUser(user);
     const userEmail = await userRepo.getEmailById(user);
     if (createdBan) {
-      sendMail(ban_message(userEmail.dataValues.email));
+      sendNewEmailProducer(ban_message(userEmail.dataValues.email));
       res.status(200).json({
         result: 1,
         userBanned: createdBan
@@ -47,7 +47,7 @@ router.delete("/user", authorize, permitRole('admin'), async function (req, res)
   const userDeleted = await userRepo.remove(user);
   const userEmail = await userRepo.getEmailById(user);
   if (userDeleted) {
-    sendMail(delete_message(userEmail.dataValues.email));
+    sendNewEmailProducer(delete_message(userEmail.dataValues.email));
     res.status(200).json({
       result: 1,
       userDeleted: userDeleted

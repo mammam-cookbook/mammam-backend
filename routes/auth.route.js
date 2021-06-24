@@ -4,7 +4,7 @@ const userRepo = require("../repository/user.repo");
 const models = require("../models");
 const jwt = require("jsonwebtoken");
 const { forget_message } = require("../utils/mail.model");
-const sendMail = require("../utils/mailer");
+const { sendNewEmailProducer } = require("../utils/jobQueue");
 const crypto = require("crypto");
 const authorization = require("../middlewares/authorize");
 const bcrypt = require("bcryptjs");
@@ -249,7 +249,7 @@ router.post("/forgot-password", async (req, res) => {
       process.env.CONFIRM_EXP || 86400
     );
     if (cacheCode && expireTime) {
-      sendMail(forget_message(findUser.email, token));
+      sendNewEmailProducer(forget_message(findUser.email, token));
       return res.status(200).json(
         {
           result: 1,
