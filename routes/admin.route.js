@@ -3,7 +3,7 @@ const userRepo = require("../repository/user.repo");
 const { ban_message } = require("../utils/mail.model");
 const { unban_message } = require("../utils/mail.model");
 const { delete_message } = require("../utils/mail.model");
-const sendMail = require("../utils/mailer");
+const {sendNewEmailProducer} = require("../utils/jobQueue");
 const { route } = require("./auth.route");
 const { sendNotification } = require('../socketHandler/notification.handler')
 const notificationRepo = require("../repository/notification.repo");
@@ -34,7 +34,7 @@ router.post("/unban", authorize, permitRole('admin'), async function (req, res) 
     const createdUnban = await userRepo.unbanUser(user);
     const userEmail = await userRepo.getEmailById(user);
     if (createdUnban) {
-      sendMail(unban_message(userEmail.dataValues.email));
+      sendNewEmailProducer(unban_message(userEmail.dataValues.email));
       res.status(200).json({
         result: 1,
         userUnbanned: createdUnban

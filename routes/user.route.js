@@ -2,7 +2,7 @@ const router = require("express").Router();
 const userRepo = require("../repository/user.repo");
 const followRepo = require("../repository/follow.repo");
 const { register_message } = require("../utils/mail.model");
-const sendMail = require("../utils/mailer");
+const { sendNewEmailProducer } = require("../utils/jobQueue");
 const { route } = require("./auth.route");
 const { sendNotification } = require('../socketHandler/notification.handler')
 const notificationRepo = require("../repository/notification.repo");
@@ -36,7 +36,7 @@ router.post("/", async function (req, res) {
   }
   const createdUser = await userRepo.create(user);
   if (createdUser) {
-    sendMail(register_message(user.email))
+    sendNewEmailProducer(register_message(user.email))
     res.status(200).json({
       message: "Sign up success! Please signin"
     });

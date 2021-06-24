@@ -65,6 +65,14 @@ services:
       - 5601:5601
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
+  redis-commander:
+    container_name: redis-commander
+    image: rediscommander/redis-commander
+    restart: always
+    environment:
+      - REDIS_HOSTS=redis
+    ports:
+      - "8081:8081"
   # proxy:
   #   image: nginx:alpine
   #   container_name: web-proxy
