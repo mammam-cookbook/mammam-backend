@@ -105,9 +105,9 @@ async function getAll(type, user_id) {
 
 async function getAllForElasticSearch() {
   return await Recipe.findAll({
-    //where: {
-    //  status: 'Approved'
-    //},
+    where: {
+      status: 'Approved'
+    },
     include: [
       {
         model: models.User,
