@@ -4,6 +4,7 @@ let Reaction = models.Reaction;
 let Recipe = models.Recipe;
 let Follow = models.Follow;
 const bcrypt = require("bcryptjs");
+const { array } = require("joi");
 
 const { Op } = require('sequelize');
 
@@ -351,6 +352,63 @@ async function sendNotificationToAll(notification) {
   }
 }
 
+async function editlevel(lv, userid) {
+  return User.update({level: lv},{
+    where: {
+        id: userid,
+    },
+  }
+  );
+}
+
+async function addAllergies(ingre, userid) {
+  let all = await User.findOne({
+    where:{
+      id: userid,
+    },
+    attributes: ["allergies"]
+  });
+
+  if(all.dataValues.allergies === null)
+  {
+    all.dataValues.allergies = ingre;
+  }
+  else {
+    ingre.forEach(element => all.dataValues.allergies.push(element));
+  }
+
+  return User.update({allergies: all.dataValues.allergies},{
+    where: {
+        id: userid,
+    },
+  }
+  );
+}
+
+async function addDislikedIngredient(ingre, userid) {
+  let all = await User.findOne({
+    where:{
+      id: userid,
+    },
+    attributes: ["disliked_ingredients"]
+  });
+
+  if(all.dataValues.disliked_ingredients === null)
+  {
+    all.dataValues.disliked_ingredients = ingre;
+  }
+  else {
+    ingre.forEach(element => all.dataValues.disliked_ingredients.push(element));
+  }
+
+  return User.update({disliked_ingredients: all.dataValues.disliked_ingredients},{
+    where: {
+        id: userid,
+    },
+  }
+  );
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -363,6 +421,9 @@ module.exports = {
   update_ref_token,
   getByEmail,
   comparePassword,
+  editlevel,
+  addAllergies,
+  addDislikedIngredient,
   getAllUsers,
   recipeDetail,
   addPoint,
