@@ -53,13 +53,15 @@ async function create(req, reaction) {
         const notification = {
             sender_id: reaction.user_id,
             receiver_id: recipe.user_id,
-            type: 'like'
+            type: 'like',
+            recipe_id: recipe.id
         }
         const createdNotification = await notificationRepo.create(notification);
         const notificationData = {
             id: createdNotification.id,
             sender: reaction.user,
             receiver: recipe.author,
+            recipe,
             createdAt: createdNotification.createdAt
         }
         console.log({ createdNotification, notificationData})

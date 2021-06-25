@@ -28,15 +28,34 @@ router.post("/", authorize, permitRole('user'), async function (req, res) {
       if (comment.parent_comment_id) {
         parentComment = await commentRepo.getById(comment.parent_comment_id)
       }
+      console.log({ comment })
       // create a notification
-      // nếu ngườ comment là author, hoặc reply của comment chính mình thì không tạo notification
+      // nếu người comment là author, hoặc reply của comment chính mình thì không tạo notification
       if (req.user.id !== recipe.user_id && req.user.id !== _.get(parentComment, 'user_id')) {
         const notification = {
           sender_id: req.user.id,
           type: comment.parent_comment_id ? 'reply' : 'comment',
           receiver_id: comment.parent_comment_id ? _.get(parentComment, 'author.id') : _.get(recipe, 'author.id'),
           recipe_id: comment.recipe_id,
-          comment_id: _.get(parentComment,'id')
+          comment_id: _.get(createdComment,'id')
+        }
+        const createdNotification = await notificationRepo.create(notification);
+        const receiver = await userRepo.getById(notification.receiver_id);
+        const notificationData = {
+          id: createdNotification.id,
+          sender: req.user,
+          receiver,
+          type: notification.type,
+          createdAt: createdNotification.createdAt
+        }
+        sendNotification(req, notificationData)
+      } else if (req.user.id === recipe.user_id && parentComment && parentComment.user_id !== req.user.id) {
+        const notification = {
+          sender_id: req.user.id,
+          type: 'reply',
+          receiver_id: parentComment.user_id,
+          recipe_id: comment.recipe_id,
+          comment_id: _.get(createdComment,'id')
         }
         const createdNotification = await notificationRepo.create(notification);
         const receiver = await userRepo.getById(notification.receiver_id);
