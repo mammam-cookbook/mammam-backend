@@ -18,6 +18,9 @@ async function listNotifications({user_id, limit = 10, offset = 0 }) {
     where: {
       receiver_id: user_id
     },
+    order: [
+      ["created_at", "DESC"]
+    ],
     include: [
         {
             model: models.User,
