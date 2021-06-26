@@ -6,13 +6,25 @@ const elasticClient = require("../utils/elasticsearch");
 const followRepo = require('../repository/follow.repo');
 const { Op } = require('sequelize');
 const { isArray } = require("lodash");
+const userRepo = require("../repository/user.repo");
+
 async function getAll(type, user_id) {
   console.log({ type, user_id })
   let where;
   let attributes;
   let order;
   if (type === 'recommend') {
-    // 
+    let finalQuery = {};
+
+    if (user_id !== null) {
+      finalQuery = await userRepo.getCustomization(user_id); 
+    }
+
+    let reactionOrder = 'asc';
+    finalQuery = {...finalQuery, reactionOrder}; console.log(finalQuery);
+    
+    const result = await RecommendSearch(finalQuery);
+    return result;
   } else if (type === 'following') {
     const followings = await followRepo.getFollowings(user_id);
     const followingIds = followings.map(item => item.following_id);
