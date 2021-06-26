@@ -7,6 +7,9 @@ const { route } = require("./auth.route");
 const { sendNotification } = require('../socketHandler/notification.handler')
 const notificationRepo = require("../repository/notification.repo");
 
+const allergyRepo = require("../repository/allergyUser.repo");
+const dietRepo = require("../repository/dietUser.repo");
+
 const recipeRepo = require("../repository/recipe.repo");
 const authorize = require("../middlewares/authorize");
 const getUserId = require("../middlewares/getUserId");
@@ -160,4 +163,109 @@ router.put("/:id", authorize, async (req, res) => {
     throw new Error(error);
   }
 })
+//
+router.post("/allergyuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const allergyData = { user_id: req.user.id, category_id };
+  try {
+    const allergy = await allergyRepo.create(allergyData);
+    if (allergy) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.delete("/allergyuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const allergyData = { user_id: req.user.id, category_id };
+  try {
+    const allergy = await allergyRepo.remove(allergyData);
+    if (allergy === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/dietuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const dietData = { user_id: req.user.id, category_id };
+  try {
+    const diet = await dietRepo.create(dietData);
+    if (diet) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.delete("/dietuser/:category_id", authorize, async (req, res) => {
+  const { category_id } = req.params;
+  const dietData = { user_id: req.user.id, category_id };
+  try {
+    const diet = await dietRepo.remove(dietData);
+    if (diet === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/userexperience", authorize, async (req, res) => {
+  const level = req.body.level;
+  try {
+    const result = await userRepo.editlevel(level, req.user.id);
+    if(result[0] === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+// router.post("/userallergies", authorize, async (req, res) => {
+//   //const {id} = req.params;
+//   const allergies = req.body.allergies;
+//   try {
+//     //const result = await userRepo.addAllergies(allergies, id);
+//     const result = await userRepo.addAllergies(allergies, req.user.id);
+//     if(result[0] === 1) {
+//       return res.status(200).json({
+//         result: 1
+//       })
+//     }
+//   } catch(err) {
+//     throw new Error(err);
+//   }
+// })
+
+router.post("/userdislikedingredient", authorize, async (req, res) => {
+  const disliked = req.body.disliked;
+  try {
+    const result = await userRepo.addDislikedIngredient(disliked, req.user.id);
+    if(result[0] === 1) {
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
 module.exports = router;

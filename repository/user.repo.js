@@ -9,6 +9,9 @@ const { Op } = require('sequelize');
 
 const sendNoti = require("../utils/sendNotification");
 
+const dietRepo = require("../repository/dietUser.repo");
+const allergyRepo = require("../repository/allergyUser.repo");
+
 async function searchUsers({ limit = 10, offset = 0, keyword }) {
   return await User.findAndCountAll({
     where: {
@@ -351,6 +354,104 @@ async function sendNotificationToAll(notification) {
   }
 }
 
+async function editlevel(lv, userid) {
+  return User.update({level: lv},{
+    where: {
+        id: userid,
+    },
+  }
+  );
+}
+
+async function addDislikedIngredient(ingre, userid) {
+  let all = await User.findOne({
+    where:{
+      id: userid,
+    },
+    attributes: ["disliked_ingredients"]
+  });
+
+  if(all.dataValues.disliked_ingredients === null)
+  {
+    all.dataValues.disliked_ingredients = ingre;
+  }
+  else {
+    //ingre.forEach(element => all.dataValues.disliked_ingredients.push(element));
+    for (var add of ingre) 
+    {
+      var validation = false;
+      for (var alr of all.dataValues.disliked_ingredients) 
+      {
+        if (alr === add) //this ingredient already existed in user's disliked ingredients
+        {
+          validation = true; break;
+        }
+      }
+      if (validation === false) 
+      {
+        all.dataValues.disliked_ingredients.push(add);
+      }
+    }
+  }
+
+  return User.update({disliked_ingredients: all.dataValues.disliked_ingredients},{
+    where: {
+        id: userid,
+    },
+  }
+  );
+}
+
+async function getCustomization(user_id) {
+  let result;
+
+  let all = await User.findOne({
+    where:{
+      id: user_id,
+    },
+    attributes: ["disliked_ingredients"]
+  });
+
+  if (all.dataValues.disliked_ingredients !== null) 
+  {
+    if(all.dataValues.disliked_ingredients.length > 1)
+    {
+      let excludeIngredients = all.dataValues.disliked_ingredients;
+      result = {...result, excludeIngredients};
+    }
+    else 
+    {
+      let excludeIngredients = all.dataValues.disliked_ingredients[0];
+      result = {...result, excludeIngredients};
+    }
+  }
+
+  let temp = [];
+
+  let diet = await dietRepo.getFromUser(user_id); 
+  for (var item of diet.rows)
+  {
+    temp.push(item.category_id);
+  }
+  let allergy = await allergyRepo.getFromUser(user_id); 
+  for (var item of allergy.rows)
+  {
+    temp.push(item.category_id);
+  }
+
+  let categories;
+  if (temp.length === 1) {
+    categories = temp[0];
+    result = {...result, categories};
+  }
+  else if (temp.length > 1) {
+    categories = temp;
+    result = {...result, categories};
+  }
+
+  return result;
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -374,5 +475,8 @@ module.exports = {
   findGoogleUser,
   updateDeviceToken,
   sendNotificationToAll,
-  removeDeviceToken
+  removeDeviceToken,
+  editlevel,
+  addDislikedIngredient,
+  getCustomization
 };
