@@ -1,11 +1,20 @@
 const express = require("express");
-const socket_io = require("socket.io");
+const http = require('http');
+const { Server } = require("socket.io");
+const app = express();
+const server = http.createServer(app);
 const jwt = require("jsonwebtoken");
 var cron = require('node-cron');
+const redis = require('./utils/caching');
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  }
+});
+
 const esclient = require('./repository/elasticsearch.repo');
 const menuReminder = require('./cronJobs/menuReminder')
 
-const app = express();
 require("dotenv").config();
 //Log request
 const morgan = require("morgan");
@@ -14,12 +23,6 @@ app.use(morgan("dev"));
 const cors = require("cors");
 app.use(cors());
 
-// socket.io
-const io = socket_io();
-
-app.io = io;
-
-app.set("socketio", io);
 var task = cron.schedule('0 10,15,21 * * *', () => {
   console.log('Runing a job at 10am,4pm and 9pm at  Asia/Bangkok timezone');
   menuReminder.remindRecipeInMenu();
@@ -30,38 +33,31 @@ var task = cron.schedule('0 10,15,21 * * *', () => {
 
 task.start();
 
-io.use((socket, next) => {
-  if (socket.handshake.query && socket.handshake.query.token) {
-    const token = socket.handshake.query.token.split(" ")[1];
-    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
-      if (err) return next(new Error("Authentication error"));
-      socket.userData = decoded;
-      next();
-    });
+app.io = io;
+app.set("socketio", io);
+io.use(async(socket, next) => {
+  console.log("Connections", socket.handshake.query.token )
+  if (socket.handshake.query.token) {
+    const token = socket.handshake.query.token;
+    if (!token) {
+      next(new Error("Authentication error"))
+    }
+    const stringifyUser = await redis.getAsync(token);
+    if (stringifyUser) {
+      const user = JSON.parse(stringifyUser)
+      socket.user = {...user, socketId: socket.id}
+      next()
+    }
   } else {
-    next(new Error("Authentication error"));
+    next(new Error("Authentication error"))
   }
-}).on("connection", (socket) => {
-  // Connection now authenticated to receive further events
-  // socket.join(socket.userData.userId);
-  // io.in(socket.userData.userId).clients((err, clients) => {
-  //   userController.changeStatus(socket.userData.userId, clients, io);
-  //   //console.log(clients);
-  // });
-  // socket.on("typing", (data) => {
-  //   socket.to(data.userId).emit("typing", { roomId: data.roomId });
-  // });
-  // socket.on("stoppedTyping", (data) => {
-  //   socket.to(data.userId).emit("stoppedTyping", { roomId: data.roomId });
-  // });
-  // socket.on("disconnect", () => {
-  //   socket.leave(socket.userData.userId);
-  //   io.in(socket.userData.userId).clients((err, clients) => {
-  //     userController.changeStatus(socket.userData.userId, clients, io);
-  //   });
-  // });
-  console.log("------- connection -------------");
+  next()
+}).on('connection', (socket) => {
+  console.log({ userId: socket.user.id})
+  socket.join(socket.user.id)
 });
+
+
 
 //Use body parser
 let bodyParser = require("body-parser");
@@ -109,7 +105,7 @@ app.use(function (err, req, res, next) {
   res.status(500).send("Something broke!");
 });
 const port = process.env.PORT || 3001;
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 

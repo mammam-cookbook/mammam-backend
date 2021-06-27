@@ -1,5 +1,6 @@
 const redis = require('redis');
 const bluebird = require('bluebird');
+require("dotenv").config();
 
 bluebird.promisifyAll(redis)
 let client = redis.createClient({
