@@ -63,7 +63,12 @@ module.exports = (sequelize, DataTypes) => {
             device_token: {
                 type: DataTypes.STRING,
                 allowNull: true
-            }
+            },
+            level: {
+                type: DataTypes.ENUM('easy', 'medium', 'hard')
+            },
+            //allergies : DataTypes.ARRAY(DataTypes.STRING),
+            disliked_ingredients : DataTypes.ARRAY(DataTypes.STRING),
         },
         {
             tableName: "user",
