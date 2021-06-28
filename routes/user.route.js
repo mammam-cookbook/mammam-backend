@@ -268,4 +268,32 @@ router.post("/userdislikedingredient", authorize, async (req, res) => {
   }
 })
 
+router.post("/firstlogin", async (req, res) => {
+  const user_id = req.body.user_id;
+  try {
+    const result = await userRepo.checkIfFirstTimeLogin(user_id);
+    if (result.query) {
+      return res.status(200).json({
+        result: result.result
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
+router.post("/changefirstlogin", async (req, res) => {
+  const user_id = req.body.user_id;
+  try {
+    const result = await userRepo.changeFirstTimeLogin(user_id);
+    if (result) {
+      return res.status(200).json({
+        result: result
+      })
+    }
+  } catch(err) {
+    throw new Error(err);
+  }
+})
+
 module.exports = router;
