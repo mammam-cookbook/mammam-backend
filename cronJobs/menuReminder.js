@@ -30,7 +30,6 @@ async function pushNotification(menus) {
             createdAt: createdNotification.createdAt
           }
         // remindNotification(notificationData)
-        console.log({ user })
         if (user.device_token) {
             return sendToOne({
                 notification: {
@@ -58,6 +57,5 @@ exports.remindRecipeInMenu = async () => {
         unixTime = moment().utc().startOf('days').unix()
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'night')
     }
-    console.log({ remindRecipes, unixTime })
     pushNotification(remindRecipes)
 }

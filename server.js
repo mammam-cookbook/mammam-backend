@@ -53,7 +53,6 @@ io.use(async(socket, next) => {
   }
   next()
 }).on('connection', (socket) => {
-  console.log({ userId: socket.user.id})
   socket.join(socket.user.id)
 });
 

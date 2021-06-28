@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs");
 const { Op } = require('sequelize');
 
 async function getRecipesBetweenTwoDates(start, end, user_id) {
-    console.log({ start, end})
     return Menu.findAll({
         where: {
             timestamp: {

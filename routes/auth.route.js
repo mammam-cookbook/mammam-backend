@@ -303,9 +303,7 @@ router.post("/new-password", async (req, res) => {
         const {email, type} = parsedData;
         switch (type) {
           case "forgot_password": {
-            console.log({ email })
             bcrypt.hash(password, 12).then((hashedpassword) => {
-              console.log({ hashedpassword })
               models.User.update(
                 {
                   password: hashedpassword,

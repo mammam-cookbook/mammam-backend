@@ -101,7 +101,6 @@ async function addRecipeToCollection({ recipe_id, collection_id}) {
   }
 
   const collectionItem = await CollectionItem.findOne({ where : { recipe_id, collection_id}})
-  console.log('------ collection iutem ---------', collectionItem)
   if (collectionItem) {
     throw new Error('Recipe already exist in collection')
   }
