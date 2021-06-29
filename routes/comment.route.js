@@ -43,6 +43,8 @@ router.post("/", authorize, permitRole('user'), async function (req, res) {
         const receiver = await userRepo.getById(notification.receiver_id);
         const notificationData = {
           id: createdNotification.id,
+          recipe,
+          comment: createdComment,
           sender: req.user,
           receiver,
           type: notification.type,
@@ -61,6 +63,8 @@ router.post("/", authorize, permitRole('user'), async function (req, res) {
         const receiver = await userRepo.getById(notification.receiver_id);
         const notificationData = {
           id: createdNotification.id,
+          recipe: recipe,
+          comment: createdComment,
           sender: req.user,
           receiver,
           type: notification.type,

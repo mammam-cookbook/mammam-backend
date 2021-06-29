@@ -62,6 +62,7 @@ async function create(req, reaction) {
             sender: reaction.user,
             receiver: recipe.author,
             recipe,
+            type: 'like',
             createdAt: createdNotification.createdAt
         }
         console.log({ createdNotification, notificationData})
