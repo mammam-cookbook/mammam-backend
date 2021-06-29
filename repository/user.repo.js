@@ -452,6 +452,43 @@ async function getCustomization(user_id) {
   return result;
 }
 
+async function checkIfFirstTimeLogin(user_id) {
+  let login = await User.findOne({
+    where:{
+      id: user_id,
+    },
+    attributes: ["first_login"]
+  });
+
+  let bool = true;
+  if(login.dataValues.first_login === null) {
+    bool = true;
+  }
+  if(login.dataValues.first_login === false) {
+    bool = false;
+  }
+  if(login.dataValues.first_login === true) {
+    bool = true;
+  }
+
+  let result = {
+    query: login,
+    result: bool
+  };
+
+  return result;
+}
+
+async function changeFirstTimeLogin(user_id) {
+  const result = await User.update({first_login: false},{
+    where: {
+        id: user_id,
+    },
+  }
+  );
+  return result;
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -478,5 +515,7 @@ module.exports = {
   removeDeviceToken,
   editlevel,
   addDislikedIngredient,
-  getCustomization
+  getCustomization,
+  checkIfFirstTimeLogin,
+  changeFirstTimeLogin,
 };

@@ -69,6 +69,11 @@ module.exports = (sequelize, DataTypes) => {
             },
             //allergies : DataTypes.ARRAY(DataTypes.STRING),
             disliked_ingredients : DataTypes.ARRAY(DataTypes.STRING),
+            first_login: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: true,
+                allowNull: true
+            },
         },
         {
             tableName: "user",
