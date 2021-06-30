@@ -51,7 +51,6 @@ io.use(async(socket, next) => {
   } else {
     next(new Error("Authentication error"))
   }
-  next()
 }).on('connection', (socket) => {
   socket.join(socket.user.id)
 });
