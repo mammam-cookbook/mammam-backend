@@ -76,13 +76,13 @@ router.post("/", async function (req, res) {
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role, avatar_url } = findUser;
+    const { id, name, email, role, avatar_url, auth, first_login } = findUser;
     return res.status(200).json({
       token,
       refreshToken,
       tokenExp,
       refreshTokenExp,
-      user: { id, name, email, role, avatar_url },
+      user: { id, name, email, role, avatar_url, auth, first_login },
     });
   }
 });
@@ -96,6 +96,12 @@ router.post("/facebook", async function (req, res) {
 
   if (!findUser) //this is the first time user log in with facebook
   {
+    const findUserEmail = await userRepo.getByEmail(user.email);
+    if (findUserEmail) {
+      return res.status(400).json({
+        err: "This email has been used. Log in failed.",
+      });
+    }
     const createdUser = await userRepo.create(user);
     if (createdUser) { 
       existed = true;
@@ -146,13 +152,13 @@ router.post("/facebook", async function (req, res) {
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role, avatar_url } = findUser;
+    const { id, name, email, role, avatar_url, auth, first_login } = findUser;
     return res.status(200).json({
       token,
       refreshToken,
       tokenExp,
       refreshTokenExp,
-      user: { id, name, email, role, avatar_url },
+      user: { id, name, email, role, avatar_url, auth, first_login },
     });
   }
 });
@@ -163,9 +169,15 @@ router.post("/google", async function (req, res) {
   const user = req.body; 
   var findUser = await userRepo.findGoogleUser(user.email);
   var existed = false;
-
+  
   if (!findUser) //this is the first time user log in with facebook
   {
+    const findUserEmail = await userRepo.getByEmail(user.email);
+    if (findUserEmail) {
+      return res.status(400).json({
+        err: "This email has been used. Log in failed.",
+      });
+    }
     const createdUser = await userRepo.create(user);
     if (createdUser) { 
       existed = true;
@@ -216,18 +228,25 @@ router.post("/google", async function (req, res) {
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role, avatar_url } = findUser;
+    const { id, name, email, role, avatar_url, auth, first_login } = findUser;
     return res.status(200).json({
       token,
       refreshToken,
       tokenExp,
       refreshTokenExp,
-      user: { id, name, email, role, avatar_url },
+      user: { id, name, email, role, avatar_url, auth, first_login },
     });
   }
 });
 
 router.post("/forgot-password", async (req, res) => {
+  const findUserEmail = await userRepo.getByEmail(req.body.email);
+  if (findUserEmail.dataValues.auth === "Facebook" || findUserEmail.dataValues.auth === "Google")
+  {
+    return res.status(400).json({
+      err: "This email is registered with Facebook or Google. No change password!",
+    });
+  }
   crypto.randomBytes(32, async (err, buffer) => {
     if (err) {
       console.log(err);
