@@ -489,6 +489,108 @@ async function changeFirstTimeLogin(user_id) {
   return result;
 }
 
+async function getAllCustomization(user_id) {
+  const lv = await User.findOne({
+    where:{
+      id: user_id,
+    },
+    attributes: ["level"]
+  });
+  
+  let result;
+
+  let level = lv.dataValues.level;
+  result = {...result, level};
+
+  let all = await User.findOne({
+    where:{
+      id: user_id,
+    },
+    attributes: ["disliked_ingredients"]
+  });
+
+  let disliked_ingredients = all.dataValues.disliked_ingredients;
+  result = {...result, disliked_ingredients};
+
+  let diet = await dietRepo.getFromUser(user_id); 
+  let allergy = await allergyRepo.getFromUser(user_id); 
+  let dietList = diet.rows;
+  let allergyList = allergy.rows;
+  result = {...result, dietList}; 
+  result = {...result, allergyList}; 
+
+  return result;
+}
+
+async function updateAllCustomization(user_id, customize) {
+  const level = User.update({level: customize.level},{
+    where: {
+        id: user_id,
+    },
+  }
+  );
+  const disliked = User.update({disliked_ingredients: customize.disliked},{
+    where: {
+        id: user_id,
+    },
+  }
+  );
+  
+  for (var item of customize.dietAdded) {
+    const dietData = { user_id: user_id, category_id: item };
+    try {
+      const diet = await dietRepo.create(dietData);
+      if (diet) {
+        continue;
+      }
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
+
+  for (var item of customize.dietRemoved) {
+    const dietData = { user_id: user_id, category_id: item };
+    try {
+      const diet = await dietRepo.remove(dietData);
+      if (diet === 1) {
+        continue;
+      }
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
+
+  for (var item of customize.allergyAdded) {
+    const allergyData = { user_id: user_id, category_id: item };
+    try {
+      const allergy = await allergyRepo.create(allergyData);
+      if (allergy) {
+        continue;
+      }
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
+
+  for (var item of customize.allergyRemoved) {
+    const allergyData = { user_id: user_id, category_id: item };
+    try {
+      const allergy = await allergyRepo.remove(allergyData);
+      if (allergy === 1) {
+        continue;
+      }
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
+  
+  let result = {
+    level: level,
+    disliked_ingredients: disliked
+  };
+  return result;
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -518,4 +620,6 @@ module.exports = {
   getCustomization,
   checkIfFirstTimeLogin,
   changeFirstTimeLogin,
+  getAllCustomization,
+  updateAllCustomization,
 };

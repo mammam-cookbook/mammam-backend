@@ -296,4 +296,35 @@ router.post("/changefirstlogin", async (req, res) => {
   }
 })
 
+router.get("/:user_id/customization", async (req, res) => {
+  const {user_id} = req.params;
+  try {
+    const custom = await userRepo.getAllCustomization(user_id);
+    if (custom) {
+      return res.status(200).json({
+        custom
+      })
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+})
+
+router.post("/customization", authorize, async (req, res) => {
+  const user_id = req.user.id;
+  const customize = req.body;
+  console.log(user_id);
+  console.log(customize);
+  try {
+    const custom = await userRepo.updateAllCustomization(user_id, customize);
+    if (custom) {
+      return res.status(200).json({
+        custom
+      })
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+})
+
 module.exports = router;
