@@ -3,6 +3,7 @@ let User = models.User;
 let Reaction = models.Reaction;
 let Recipe = models.Recipe;
 let Follow = models.Follow;
+let Challenge = models.Challenge;
 const bcrypt = require("bcryptjs");
 
 const { Op } = require('sequelize');
@@ -591,6 +592,115 @@ async function updateAllCustomization(user_id, customize) {
   return result;
 }
 
+async function getHistory(user_id) {
+  let recipes = await Recipe.findAndCountAll({
+    where: {
+      user_id: user_id
+    },
+    attributes: ['id', 'title', 'createdAt'],
+    order: [
+      ['created_at', 'ASC']
+    ],
+  });
+  let challenges = await Challenge.findAndCountAll({
+    where: {
+      user_id: user_id
+    },
+    include: [
+      {
+        model: models.Recipe,
+        as: 'recipe',
+        attributes: ['id', 'title', 'createdAt'],
+      },
+    ],
+    order: [
+      ['created_at', 'ASC']
+    ],
+  }); 
+
+  let result = [];
+
+  var n = recipes.rows.length; var i = 0;
+  var m = challenges.rows.length; var j = 0;
+
+  while (i < n && j < m) {
+    var temp_i = recipes.rows[i].dataValues.createdAt;
+    var temp_j = challenges.rows[j].dataValues.createdAt;
+
+    if (temp_i <= temp_j) { 
+      var temp = recipes.rows[i].dataValues;
+      temp = {           
+        ...temp,
+        type: 'Recipe',
+        point: '+10',
+      }
+      result.push(temp);
+      i = i + 1;
+    }
+    else { 
+      var item = challenges.rows[j];
+      var temp = item.recipe.dataValues; 
+      temp.createdAt = item.dataValues.createdAt;
+      temp = {
+        ...temp,
+        type: 'Challenge',
+        point: '+4',
+        images: item.dataValues.images
+      }
+      result.push(temp);
+      j = j + 1;
+    }
+  }
+
+  if (i < n) {
+    for (let k = i; k < n; k++) {
+      var temp = recipes.rows[k].dataValues;
+      temp = {           
+        ...temp,
+        type: 'Recipe',
+        point: '+10',
+      }
+      result.push(temp);
+    }
+  }
+  if (j < m) {
+    for (let l = j; l < m; l++) {
+      var item = challenges.rows[l];
+      var temp = item.recipe.dataValues; 
+      temp.createdAt = item.dataValues.createdAt;
+      temp = {
+        ...temp,
+        type: 'Challenge',
+        point: '+4',
+        images: item.dataValues.images
+      }
+      result.push(temp);
+    }
+  }
+
+  // for(var item of recipes.rows) {
+  //   var temp = item.dataValues;
+  //   temp = {
+  //     ...temp,
+  //     type: 'Recipe',
+  //     point: '+10',
+  //   }
+  //   result.push(temp);
+  // }
+  // for(var item of challenges.rows) {
+  //   var temp = item.recipe.dataValues; 
+  //   temp.createdAt = item.dataValues.createdAt;
+  //   temp = {
+  //     ...temp,
+  //     type: 'Challenge',
+  //     point: '+4',
+  //     images: item.dataValues.images
+  //   }
+  //   result.push(temp);
+  // }
+  return result;
+}
+
 module.exports = {
   update_password,
   isEmailExist,
@@ -622,4 +732,5 @@ module.exports = {
   changeFirstTimeLogin,
   getAllCustomization,
   updateAllCustomization,
+  getHistory,
 };

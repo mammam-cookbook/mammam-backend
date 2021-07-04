@@ -327,4 +327,18 @@ router.post("/customization", authorize, async (req, res) => {
   }
 })
 
+router.get("/:user_id/history", async (req, res) => {
+  const {user_id} = req.params;
+  try {
+    const history = await userRepo.getHistory(user_id);
+    if (history) {
+      return res.status(200).json({
+        history
+      })
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+})
+
 module.exports = router;
