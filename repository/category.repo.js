@@ -37,10 +37,26 @@ async function remove(id, user_id) {
     }
 }
 
+async function isCategoryExist(vnCategory, enCategory) {
+    const category = await Category.findOne({
+        where: {
+            [Op.or]: [
+                { 
+                    vi: vnCategory 
+                },
+                { 
+                    en: enCategory
+                }
+            ],  
+        }
+    })
+    return category ? true : false;
+}
 module.exports = {
     getAll,
     getById,
     create,
     update,
-    remove
+    remove,
+    isCategoryExist
 };

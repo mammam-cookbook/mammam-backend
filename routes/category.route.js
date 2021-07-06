@@ -62,6 +62,13 @@ router.post("/",
     async function (req, res) {
         const category = req.body;
         Object.assign(category, { user_id: req.user.id })
+        const isExist = await categoryRepo.isCategoryExist(category.vi, category.en)
+        if (isExist) {
+            return res.status(400).json({
+                result: 1,
+                message: "Category is exist"
+            })
+        }
         const createdCategory = await categoryRepo.create(category);
         if (createdCategory) {
             res.status(200).json({
