@@ -132,6 +132,7 @@ router.post("/facebook", async function (req, res) {
     });
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
+    const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
     const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
     const isSetExpireAccessToken = redis.expire(
       token,
