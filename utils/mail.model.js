@@ -8,7 +8,7 @@ let register_message = (to) => {
 
     // HTML body
     html: `<p><b>Hello ${to}!</b></p>
-        <p>Here is your confirmation link: <a href="${process.env.HOST}:${process.env.FE_PORT}/active?code=">Click Here</a></p>`,
+        <p>Welcome to MAMMAM</p>`,
   };
 };
 let forget_message = (to, code) =>{
@@ -24,7 +24,7 @@ let forget_message = (to, code) =>{
 
       // HTML body
       html: `<p><b>Hello ${to}!</b></p>
-        <p>Here is your confirmation to reset your password  ${code}: <a href="mammam.me/confirm?code=${code}">Click Here</a></p>`,
+        <p>Here is your confirmation to reset your password: <a href="mammam.me/#/confirm?code=${code}">Click Here</a></p>`,
     };
 };
 let ban_message = (to) =>{

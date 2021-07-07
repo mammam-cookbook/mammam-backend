@@ -24,7 +24,7 @@ const emailProcess = async (jobData) => {
     // // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 
     // return nodemailer.getTestMessageUrl(info);
-    return sendEmail(jobData)
+    return sendEmail(jobData.data)
 
 };
 
