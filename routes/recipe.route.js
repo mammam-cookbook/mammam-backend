@@ -3,6 +3,7 @@ const recipeRepo = require("../repository/recipe.repo");
 const reactionRepo = require("../repository/reaction.repo");
 const followRepo = require("../repository/follow.repo");
 const upvoteRepo = require("../repository/upvote.repo");
+const commentRepo = require("../repository/comment.repo");
 const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
@@ -144,10 +145,46 @@ router.get("/:id", getUserId, async (req, res) => {
       isUpvoted: isUpvoted
     }
   }
-
   const comments = convertCommentArrayToTreeArray(recipe.comments);
   return res.status(200).json({
     result: {...recipe.dataValues, comments, views: recipeViews, isReaction, isFollow}
+  })
+})
+
+router.get("/:id/comment", getUserId, async (req, res) => {
+  const { userId, user } = req;
+  let comments = await commentRepo.getCommentFromRecipe(req.params.id);
+  if (!comments) {
+    return res.status(400).json({
+      message: "Query went wrong!"
+    })
+  }
+  for (var item of comments.rows) {
+    const upvoteCount = await upvoteRepo.countUpvote(item.id);
+    const isUpvoted = await upvoteRepo.checkIfUpvoted(userId, item.id);
+    item.dataValues = {
+      ...item.dataValues,
+      upvoteCount: upvoteCount,
+      isUpvoted: isUpvoted
+    }
+  }
+  comments.rows = convertCommentArrayToTreeArray(comments.rows);
+  // if(req.query.type === 'upvote') {
+  //   for (let i = 0; i < comments.rows.length; i++)
+  //   {
+  //     for (let j = i + 1; j < comments.rows.length; j++)
+  //     {
+  //       if (comments.rows[i].dataValues.upvoteCount > comments.rows[j].dataValues.upvoteCount) 
+  //       {
+  //         let temp = comments.rows[i];
+  //         comments.rows[i] = comments.rows[j];
+  //         comments.rows[j] = temp;
+  //       }
+  //     }
+  //   }
+  // }
+  return res.status(200).json({
+    comments
   })
 })
 
