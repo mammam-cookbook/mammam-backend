@@ -4,8 +4,6 @@ module.exports = {
             queryInterface.changeColumn('user', 'avatar_url', {
                 type: Sequelize.TEXT,
                 allowNull: true,
-            }, {
-                transaction,
             })
         ])
     },
@@ -15,8 +13,6 @@ module.exports = {
             queryInterface.changeColumn('user ', 'avatar_url', {
                 type: Sequelize.STRING,
                 allowNull: true,
-            }, {
-                transaction,
             })
         ])
     }
