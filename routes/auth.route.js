@@ -133,6 +133,10 @@ router.post("/facebook", async function (req, res) {
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
     const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    const isSetExpireAccessToken = redis.expire(
+      token,
+      60*60*24
+    );
     const isSetExpire = redis.expire(
       refreshToken,
       60*60*24*2
@@ -209,6 +213,10 @@ router.post("/google", async function (req, res) {
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
     const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    const isSetExpireAccessToken = redis.expire(
+      token,
+      60*60*24
+    );
     const isSetExpire = redis.expire(
       refreshToken,
       60*60*24*2
