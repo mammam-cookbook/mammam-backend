@@ -76,13 +76,13 @@ router.post("/", async function (req, res) {
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role, avatar_url, auth, first_login } = findUser;
+    const { id, name, email, role, avatar_url, auth, first_login, point, rank} = findUser;
     return res.status(200).json({
       token,
       refreshToken,
       tokenExp,
       refreshTokenExp,
-      user: { id, name, email, role, avatar_url, auth, first_login },
+      user: { id, name, email, role, avatar_url, auth, first_login,  point, rank },
     });
   }
 });
@@ -157,13 +157,13 @@ router.post("/facebook", async function (req, res) {
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role, avatar_url, auth, first_login } = findUser;
+    const { id, name, email, role, avatar_url, auth, first_login, point, rank } = findUser;
     return res.status(200).json({
       token,
       refreshToken,
       tokenExp,
       refreshTokenExp,
-      user: { id, name, email, role, avatar_url, auth, first_login },
+      user: { id, name, email, role, avatar_url, auth, first_login,  point, rank },
     });
   }
 });
@@ -238,13 +238,13 @@ router.post("/google", async function (req, res) {
     }
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { id, name, email, role, avatar_url, auth, first_login } = findUser;
+    const { id, name, email, role, avatar_url, auth, first_login, point, rank } = findUser;
     return res.status(200).json({
       token,
       refreshToken,
       tokenExp,
       refreshTokenExp,
-      user: { id, name, email, role, avatar_url, auth, first_login },
+      user: { id, name, email, role, avatar_url, auth, first_login,  point, rank },
     });
   }
 });
