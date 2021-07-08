@@ -251,7 +251,7 @@ router.post("/google", async function (req, res) {
 
 router.post("/forgot-password", async (req, res) => {
   const findUserEmail = await userRepo.getByEmail(req.body.email);
-  if (findUserEmail.dataValues.auth === "Facebook" || findUserEmail.dataValues.auth === "Google")
+  if (findUserEmail.auth === "Facebook" || findUserEmail.auth === "Google")
   {
     return res.status(400).json({
       err: "This email is registered with Facebook or Google. No change password!",
