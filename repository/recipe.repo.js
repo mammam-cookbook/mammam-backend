@@ -23,7 +23,8 @@ async function getAll(type, user_id) {
     let reactionOrder = 'asc';
     finalQuery = {...finalQuery, reactionOrder}; console.log(finalQuery);
     
-    const result = await RecommendSearch(finalQuery);
+    const data = await RecommendSearch(finalQuery);
+    const result = data.result.map(item => item._source);
     return result;
   } else if (type === 'following') {
     const followings = await followRepo.getFollowings(user_id);
