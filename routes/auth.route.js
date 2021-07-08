@@ -251,6 +251,11 @@ router.post("/google", async function (req, res) {
 
 router.post("/forgot-password", async (req, res) => {
   const findUserEmail = await userRepo.getByEmail(req.body.email);
+  if (!findUserEmail) {
+    return res
+    .status(422)
+    .json({ error: "User dont exists with that email" });
+  }
   if (findUserEmail.auth === "Facebook" || findUserEmail.auth === "Google")
   {
     return res.status(400).json({
