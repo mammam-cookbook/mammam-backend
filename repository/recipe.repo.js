@@ -563,11 +563,16 @@ async function remove(id, user_id) {
     if (author !== user_id) {
       throw new Error('User has no permission!')
     } else {
-      return await Recipe.destroy({
+      let destroyed = await Recipe.destroy({
         where: {
           id: id,
         },
       });
+      let result = {
+        result: destroyed,
+        recipe: recipe
+      }
+      return result;
     }
   }
 }

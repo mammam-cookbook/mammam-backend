@@ -154,7 +154,8 @@ router.get("/:id", getUserId, async (req, res) => {
 router.delete("/:id", authorize, async (req, res) => {
   try {
     const recipe = await recipeRepo.remove(req.params.id, req.user.id);
-    console.log(recipe) 
+    console.log(recipe.recipe.dataValues.id) 
+    await elasticRepo.deleteIndexDoc('recipes', recipe.recipe.dataValues.id);
     return res.status(200).json({
       result: 1
     })
