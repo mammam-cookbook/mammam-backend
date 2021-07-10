@@ -70,7 +70,7 @@ router.post("/",authorize, async function (req, res) {
       await Promise.all( await categories.map(category => categoryRecipeRepo.create({ recipe_id: createdRecipe.id, category_id: category })));
       await elasticRepo.updateIndexDoc('recipes', createdRecipe.id, 
       {
-        ...createdRecipe,
+        ...createdRecipe.dataValues,
         countReaction: 0,
         categories,
         author: { 
