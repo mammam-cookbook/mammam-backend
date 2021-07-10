@@ -132,6 +132,14 @@ async function remove(id, user_id) {
       if (author !== user_id) {
         throw new Error('User has no permission!')
       } else {
+        //
+        //console.log(reaction); console.log(reaction.dataValues);
+        let recipe = await recipeRepo.getById(reaction.dataValues.recipe_id);
+        recipe = recipe.dataValues;
+        await elasticRepo.updateIndexDoc('recipes', recipe.id, {...recipe, 
+            countReaction: recipe.reactions.length -1,
+            categories: recipe.categories.map(category => category.category_id)})
+        //
         return await Reaction.destroy({
           where: {
             id: id,

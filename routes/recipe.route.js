@@ -70,7 +70,7 @@ router.post("/",authorize, async function (req, res) {
       await Promise.all( await categories.map(category => categoryRecipeRepo.create({ recipe_id: createdRecipe.id, category_id: category })));
       await elasticRepo.updateIndexDoc('recipes', createdRecipe.id, 
       {
-        ...createdRecipe,
+        ...createdRecipe.dataValues,
         countReaction: 0,
         categories,
         author: { 
@@ -154,7 +154,8 @@ router.get("/:id", getUserId, async (req, res) => {
 router.delete("/:id", authorize, async (req, res) => {
   try {
     const recipe = await recipeRepo.remove(req.params.id, req.user.id);
-    console.log(recipe) 
+    console.log(recipe.recipe.dataValues.id) 
+    await elasticRepo.deleteIndexDoc('recipes', recipe.recipe.dataValues.id);
     return res.status(200).json({
       result: 1
     })
