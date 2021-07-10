@@ -52,12 +52,12 @@ router.post("/", async function (req, res) {
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
     const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
-    const isSetExpireAccessToken = redis.expire(
+    const isSetExpireAccessToken = await redis.expire(
       token,
       60*60*24
     );
     const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
-    const isSetExpire = redis.expire(
+    const isSetExpire = await redis.expire(
       refreshToken,
       60*60*24*2
     );
