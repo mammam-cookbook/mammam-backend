@@ -183,10 +183,49 @@ router.get("/:id/comment", getUserId, async (req, res) => {
   //     }
   //   }
   // }
+  recursiveSort(comments.rows, req.query.type);
   return res.status(200).json({
     comments
   })
 })
+
+function recursiveSort(commentArray, type)
+{
+  sortComments(commentArray, type);
+  for (let i = 0; i < commentArray.length; i++) 
+  {
+    if (commentArray[i].dataValues.childrenComments.length > 1)
+    {
+      recursiveSort(commentArray[i].dataValues.childrenComments, type);
+    }
+  }
+}
+
+function sortComments(comments, type)
+{
+  for (let i = 0; i < comments.length; i++)
+  {
+    for (let j = i + 1; j < comments.length; j++)
+    {
+      if (type === 'upvote') {
+        if (comments[i].dataValues.upvoteCount > comments[j].dataValues.upvoteCount) 
+        {
+          let temp = comments[i];
+          comments[i] = comments[j];
+          comments[j] = temp;
+        }
+      }
+      else if (type === 'chrono') {
+        if (comments[i].dataValues.createdAt > comments[j].dataValues.createdAt) 
+        {
+          let temp = comments[i];
+          comments[i] = comments[j];
+          comments[j] = temp;
+        }
+      }
+    }
+  }
+}
 
 router.delete("/:id", authorize, async (req, res) => {
   try {
