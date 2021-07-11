@@ -3,6 +3,7 @@ const recipeRepo = require("../repository/recipe.repo");
 const reactionRepo = require("../repository/reaction.repo");
 const followRepo = require("../repository/follow.repo");
 const upvoteRepo = require("../repository/upvote.repo");
+const commentRepo = require("../repository/comment.repo");
 const _ = require('lodash')
 const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
@@ -144,12 +145,87 @@ router.get("/:id", getUserId, async (req, res) => {
       isUpvoted: isUpvoted
     }
   }
-
   const comments = convertCommentArrayToTreeArray(recipe.comments);
   return res.status(200).json({
     result: {...recipe.dataValues, comments, views: recipeViews, isReaction, isFollow}
   })
 })
+
+router.get("/:id/comment", getUserId, async (req, res) => {
+  const { userId, user } = req;
+  let comments = await commentRepo.getCommentFromRecipe(req.params.id);
+  if (!comments) {
+    return res.status(400).json({
+      message: "Query went wrong!"
+    })
+  }
+  for (var item of comments.rows) {
+    const upvoteCount = await upvoteRepo.countUpvote(item.id);
+    const isUpvoted = await upvoteRepo.checkIfUpvoted(userId, item.id);
+    item.dataValues = {
+      ...item.dataValues,
+      upvoteCount: upvoteCount,
+      isUpvoted: isUpvoted
+    }
+  }
+  comments.rows = convertCommentArrayToTreeArray(comments.rows);
+  // if(req.query.type === 'upvote') {
+  //   for (let i = 0; i < comments.rows.length; i++)
+  //   {
+  //     for (let j = i + 1; j < comments.rows.length; j++)
+  //     {
+  //       if (comments.rows[i].dataValues.upvoteCount > comments.rows[j].dataValues.upvoteCount) 
+  //       {
+  //         let temp = comments.rows[i];
+  //         comments.rows[i] = comments.rows[j];
+  //         comments.rows[j] = temp;
+  //       }
+  //     }
+  //   }
+  // }
+  recursiveSort(comments.rows, req.query.type);
+  return res.status(200).json({
+    comments
+  })
+})
+
+function recursiveSort(commentArray, type)
+{
+  sortComments(commentArray, type);
+  for (let i = 0; i < commentArray.length; i++) 
+  {
+    if (commentArray[i].dataValues.childrenComments.length > 1)
+    {
+      recursiveSort(commentArray[i].dataValues.childrenComments, type);
+    }
+  }
+}
+
+function sortComments(comments, type)
+{
+  for (let i = 0; i < comments.length; i++)
+  {
+    for (let j = i + 1; j < comments.length; j++)
+    {
+      if (type === 'upvote') {
+        if (comments[i].dataValues.upvoteCount > comments[j].dataValues.upvoteCount) 
+        {
+          let temp = comments[i];
+          comments[i] = comments[j];
+          comments[j] = temp;
+        }
+      }
+      else if (type === 'chrono') {
+        if (comments[i].dataValues.createdAt > comments[j].dataValues.createdAt) 
+        {
+          let temp = comments[i];
+          comments[i] = comments[j];
+          comments[j] = temp;
+        }
+      }
+    }
+  }
+}
 
 router.delete("/:id", authorize, async (req, res) => {
   try {
