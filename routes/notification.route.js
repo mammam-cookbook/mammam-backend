@@ -4,7 +4,8 @@ const authorize = require('../middlewares/authorize');
 const permitRole = require("../middlewares/permitRole");
 
 router.get("/",authorize, async function (req, res) {
-    const notifications = await notificatioRepo.listNotifications({ user_id: req.user.id });
+    const { limit, offset } = req.query;
+    const notifications = await notificatioRepo.listNotifications({ user_id: req.user.id, limit, offset });
     if (notifications) {
       res.status(200).json({
         result: 1,
