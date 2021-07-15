@@ -87,11 +87,31 @@ async function remove(id, user_id) {
     }
 }
 
+async function getCommentFromRecipe(recipe_id) {
+    return await Comment.findAndCountAll({
+        where: {
+            recipe_id
+        },
+        attributes: ['id', 'images', 'content', 'parent_comment_id', 'created_at', 'updated_at'],
+        include: [
+            {
+              model: models.User,
+              as: 'author',
+              attributes: ['id', 'name', 'avatar_url', 'email']
+            }
+        ],
+        order: [
+            ['created_at', 'DESC']
+        ],
+    });
+}
+
 module.exports = {
     getAll,
     getById,
     create,
     update,
     remove,
-    query
+    query,
+    getCommentFromRecipe
 };
