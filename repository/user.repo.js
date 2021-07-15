@@ -63,6 +63,9 @@ async function getById(id) {
     where: {
       id
     },
+    attributes: {
+      exclude: ['password']
+    },
     include: [
       {
         model: models.Follow,
