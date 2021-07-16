@@ -99,7 +99,7 @@ router.get("/:id/follower", async(req, res) => {
     let followers = await followRepo.getFollowers(id);
     followers = await Promise.all(followers.map( async (follower) => {
       const recipes = await recipeRepo.getRecipeFromUser(follower.user_id)
-      follower.user.recipes = recipes
+      follower.recipes = recipes.length || 0
       return follower
     }))
     return res.status(200).json({
@@ -116,7 +116,7 @@ router.get("/:id/following", async(req, res) => {
     let followings = await followRepo.getFollowings(id);
     followings = await Promise.all(followings.map( async (following) => {
       const recipes = await recipeRepo.getRecipeFromUser(following.user_id)
-      following.following.recipes = recipes
+      following.recipes = recipes || 0
       return following
     }))
     return res.status(200).json({
