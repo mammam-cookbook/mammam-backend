@@ -96,7 +96,12 @@ router.post("/:id/follow/:following_id", authorize, async (req, res) => {
 router.get("/:id/follower", async(req, res) => {
   const {id} = req.params;
   try {
-    const followers = await followRepo.getFollowers(id);
+    let followers = await followRepo.getFollowers(id);
+    followers = await Promise.all(followers.map( async (follower) => {
+      const recipes = await recipeRepo.getRecipeFromUser(follower.user_id)
+      follower.user.recipes = recipes
+      return follower
+    }))
     return res.status(200).json({
       followers
     })
@@ -108,7 +113,12 @@ router.get("/:id/follower", async(req, res) => {
 router.get("/:id/following", async(req, res) => {
   const {id} = req.params;
   try {
-    const followings = await followRepo.getFollowings(id);
+    let followings = await followRepo.getFollowings(id);
+    followings = await Promise.all(followings.map( async (following) => {
+      const recipes = await recipeRepo.getRecipeFromUser(following.user_id)
+      following.following.recipes = recipes
+      return following
+    }))
     return res.status(200).json({
       followings
     })

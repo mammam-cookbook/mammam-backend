@@ -25,7 +25,7 @@ async function getFollowings(userId) {
     include: [
      {
        model: models.User,
-       attributes: ['id', 'name', 'avatar_url', 'email'],
+       attributes: ['id', 'name', 'avatar_url', 'email', 'rank'],
        as: 'following'
      } 
     ]
@@ -51,7 +51,7 @@ async function getFollowers(userId) {
     include: [
       {
         model: models.User,
-        attributes: ['id', 'name', 'avatar_url', 'email'],
+        attributes: ['id', 'name', 'avatar_url', 'email', 'rank'],
         as: 'user'
       } 
      ]
