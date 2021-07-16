@@ -9,7 +9,7 @@ const authorize = require('../middlewares/authorize');
 const recipeViewsRepo = require("../repository/recipeViews.repo");
 const categoryRecipeRepo = require("../repository/categoryRecipe.repo");
 const getUserId = require("../middlewares/getUserId");
-const elasticRepo = require("../repository/elasticsearch.repo")
+const elasticRepo = require("../repository/elasticsearch.repo");
 
 const convertCommentArrayToTreeArray = (arr) => {
   const hashObj = {};
@@ -244,6 +244,34 @@ router.delete("/:id", authorize, async (req, res) => {
   }
 })
 
-
+router.put("/:id", authorize, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+    const res = await recipeRepo.update(id, data);
+    const updatedRecipe = await recipeRepo.getById(id);
+    if (res) {
+      await elasticRepo.updateIndexDoc('recipes', updatedRecipe.id, {
+        ...updatedRecipe.dataValues,
+        countReaction: updatedRecipe.reactions.length,
+        categories: data.categories,
+        author: { 
+          id: req.user.id,
+          name: req.user.name,
+          avatar_url: req.user.avatar_url,
+          email: req.user.email
+        } 
+      })
+      return res.status(200).json({
+        result: 1
+      })
+    }
+  } catch (error) {
+    res.status(400).json({
+      result: 0,
+      message: error.message
+    })
+  }
+})
 
 module.exports = router;
