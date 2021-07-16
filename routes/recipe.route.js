@@ -249,6 +249,8 @@ router.put("/:id", authorize, async (req, res) => {
     const { id } = req.params;
     const data = req.body;
     const result = await recipeRepo.update(id, data);
+    await categoryRecipeRepo.removeCategoriesOfRecipe(id);
+    await Promise.all(data.categories.map(category => categoryRecipeRepo.create({ recipe_id: id, category_id: category })))
     const updatedRecipe = await recipeRepo.getById(id);
     if (result) {
       await elasticRepo.updateIndexDoc('recipes', updatedRecipe.id, {

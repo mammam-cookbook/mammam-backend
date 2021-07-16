@@ -7,7 +7,16 @@ async function create(categoryRecipe) {
     return CategoryRecipe.create(categoryRecipe);
 }
 
+async function removeCategoriesOfRecipe(recipeId) {
+    return CategoryRecipe.destroy({
+        where: {
+            recipe_id: recipeId
+        }
+    })
+}
+
 
 module.exports = {
-    create
+    create,
+    removeCategoriesOfRecipe
 };
