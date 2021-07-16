@@ -116,6 +116,7 @@ router.get("/:id/following", async(req, res) => {
     let followings = await followRepo.getFollowings(id);
     followings = await Promise.all(followings.map( async (following) => {
       const recipes = await recipeRepo.getRecipeFromUser(following.user_id)
+      console.log({ recipes })
       following.recipes = recipes || 0
       return following
     }))
