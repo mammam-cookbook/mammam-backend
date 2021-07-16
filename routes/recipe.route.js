@@ -248,9 +248,9 @@ router.put("/:id", authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
-    const res = await recipeRepo.update(id, data);
+    const result = await recipeRepo.update(id, data);
     const updatedRecipe = await recipeRepo.getById(id);
-    if (res) {
+    if (result) {
       await elasticRepo.updateIndexDoc('recipes', updatedRecipe.id, {
         ...updatedRecipe.dataValues,
         countReaction: updatedRecipe.reactions.length,
