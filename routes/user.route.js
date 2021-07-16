@@ -18,7 +18,12 @@ const { trimStart } = require("lodash");
 router.get('/', async (req, res) => {
   const {keyword, limit, offset} = req.query;
   try {
-    const userlist = await userRepo.searchUsers({ limit, offset, keyword });
+    let userlist = await userRepo.searchUsers({ limit, offset, keyword });
+    userlist.rows = await Promise.all(userlist.rows.map(async(user) => {
+      const recipes = await recipeRepo.getRecipeFromUser(user.id)
+      user.dataValues.recipes = recipes.length
+      return user
+    }))
     return res.status(200).json({
       userlist
     })
