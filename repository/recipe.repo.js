@@ -21,7 +21,10 @@ async function getAll(type, user_id) {
     }
 
     let reactionOrder = 'asc';
-    finalQuery = {...finalQuery, reactionOrder}; console.log(finalQuery);
+    //finalQuery = {...finalQuery, reactionOrder}; 
+    
+    finalQuery = {...finalQuery, excludeIngredients: finalQuery.excludeIngredients.map(ingredient => ingredient.toLowerCase(), reactionOrder )}
+    console.log(finalQuery);
     
     const data = await RecommendSearch(finalQuery);
     const result = data.result.map(item => item._source);
