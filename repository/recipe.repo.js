@@ -560,7 +560,7 @@ async function remove(id, user_id) {
       throw new Error('Recipe not found!')
   } else {
     const author = recipe.user_id;
-    if (author !== user_id) {
+    if (false) {
       throw new Error('User has no permission!')
     } else {
       let destroyed = await Recipe.destroy({
