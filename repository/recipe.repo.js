@@ -13,6 +13,7 @@ async function getAll(type, user_id) {
   let where;
   let attributes;
   let order;
+  let excludeIngredients;
   if (type === 'recommend') {
     let finalQuery = {};
 
@@ -22,8 +23,10 @@ async function getAll(type, user_id) {
 
     let reactionOrder = 'asc';
     //finalQuery = {...finalQuery, reactionOrder}; 
-    
-    finalQuery = {...finalQuery, excludeIngredients: finalQuery.excludeIngredients.map(ingredient => ingredient.toLowerCase(), reactionOrder )}
+    if (finalQuery.excludeIngredients) {
+      excludeIngredients = finalQuery.excludeIngredients.map(ingredient => ingredient.toLowerCase())
+    }
+    finalQuery = {...finalQuery, excludeIngredients, reactionOrder }
     console.log(finalQuery);
     
     const data = await RecommendSearch(finalQuery);
