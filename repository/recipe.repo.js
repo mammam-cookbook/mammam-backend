@@ -22,7 +22,7 @@ async function getAll(type, user_id) {
     }
 
     let reactionOrder = 'asc';
-    //finalQuery = {...finalQuery, reactionOrder}; 
+    
     if (finalQuery.excludeIngredients) {
       if (Array.isArray(finalQuery.excludeIngredients)) {
         excludeIngredients = finalQuery.excludeIngredients.map(ingredient => ingredient.toLowerCase())
