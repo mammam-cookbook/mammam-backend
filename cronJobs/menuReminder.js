@@ -7,7 +7,15 @@ const notificationRepo = require('../repository/notification.repo')
 const {sendToOne} = require('../utils/sendNotification');
 const { sendNotification, remindNotification } = require("../socketHandler/notification.handler");
 
-async function pushNotification(menus) {
+async function pushNotification(menus, time) {
+    let timeTitle;
+    if (time === "morning") {
+        timeTitle = 'sáng mai'
+    } else if (time === "noon") {
+        timeTitle = "trưa nay"
+    } else {
+        timeTitle = "tối nay"
+    }
     await Promise.all(menus.map(async(menu) => {
         const [recipe, user, admin] = await Promise.all([
             recipeRepo.getById(menu.recipe_id),
@@ -33,16 +41,15 @@ async function pushNotification(menus) {
         if (user.device_token) {
             return sendToOne({
                 notification: {
-                    title: "Meal Plan Reminder",
-                    body: recipe.title
+                    title: 'Hôm nay ăn gì',
+                    body: `Thực đơn ${timeTitle} có ${recipe.title}`
                 },
                 data : {
                   recipeId: recipe.id
                 },
                 android: {
                     notification: {
-                      icon: 'stock_ticker_update',
-                      color: '#7e55c3'
+                      imageUrl: recipe.avatar[0]
                     }
                 },
                 token: user.device_token
@@ -56,15 +63,19 @@ exports.remindRecipeInMenu = async () => {
     const date = new Date();
     const hours = (date.getHours() + 7) % 24;
     var unixTime = moment().utc().add(1, 'days').startOf('day').unix();
+    let time;
     let remindRecipes = [];
     if (hours > 20) {
+        time = 'morning'
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'morning')
     } else if (hours < 10) {
+        timr = 'noon'
         unixTime = moment().utc().startOf('days').unix()
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'noon')
     } else {
+        time = 'night'
         unixTime = moment().utc().startOf('days').unix()
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'night')
     }
-    pushNotification(remindRecipes)
+    pushNotification(remindRecipes, time)
 }
