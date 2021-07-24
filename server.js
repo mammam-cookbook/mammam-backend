@@ -23,7 +23,7 @@ app.use(morgan("dev"));
 const cors = require("cors");
 app.use(cors());
 
-var task = cron.schedule('* * * * *', () => {
+var task = cron.schedule('0 10,15,21 * * *', () => {
   console.log('Runing a job at 10am,4pm and 9pm at  Asia/Bangkok timezone');
   menuReminder.remindRecipeInMenu();
 }, {
