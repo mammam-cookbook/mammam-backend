@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: DataTypes.UUIDV4,
                 allowNull: false,
             },
+            access_token: {
+                type: DataTypes.TEXT,
+                allowNull: true
+            },
             reset_password_token: {
                 type: DataTypes.STRING,
                 allowNull: true

@@ -11,6 +11,7 @@ const bcrypt = require("bcryptjs");
 const redis = require('../utils/caching');
 const authorize = require("../middlewares/authorize");
 const { access } = require("fs");
+let User = models.User;
 
 function verifyToken(token) {
   return jwt.verify(token,process.env.JWT_SECRET, (err, decoded) => {
@@ -45,30 +46,32 @@ router.post("/", async function (req, res) {
     const token = jwt.sign({ id: findUser.id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-    // set refresh token to redis
     const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
       expiresIn: "2d"
     });
+    await userRepo.update(findUser.id, { access_token: token, ref_token: refreshToken });
+    // set refresh token to redis
+
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
-    const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
-    const isSetExpireAccessToken = await redis.expire(
-      token,
-      60*60*24
-    );
-    const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
-    const isSetExpire = await redis.expire(
-      refreshToken,
-      60*60*24*2
-    );
-    if (isSet && isSetExpire && isSetAccessToken && isSetExpireAccessToken ) {
-      console.log('---------- Save redis successfully! ----------');
-    } else {
-      return res.status(400).json({
-        result: 0,
-        message: 'Save redis failed'
-      })
-    }
+    // const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
+    // const isSetExpireAccessToken = await redis.expire(
+    //   token,
+    //   60*60*24
+    // );
+    // const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    // const isSetExpire = await redis.expire(
+    //   refreshToken,
+    //   60*60*24*2
+    // );
+    // if (isSet && isSetExpire && isSetAccessToken && isSetExpireAccessToken ) {
+    //   console.log('---------- Save redis successfully! ----------');
+    // } else {
+    //   return res.status(400).json({
+    //     result: 0,
+    //     message: 'Save redis failed'
+    //   })
+    // }
 
     if (req.body.token !== "")
     {
@@ -130,26 +133,27 @@ router.post("/facebook", async function (req, res) {
     const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
       expiresIn: "2d"
     });
+    await userRepo.update(findUser.id, { access_token: token, ref_token: refreshToken });
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
-    const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
-    const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
-    const isSetExpireAccessToken = redis.expire(
-      token,
-      60*60*24
-    );
-    const isSetExpire = redis.expire(
-      refreshToken,
-      60*60*24*2
-    );
-    if (isSet && isSetExpire ) {
-      console.log('---------- Save redis successfully! ----------');
-    } else {
-      return res.status(400).json({
-        result: 0,
-        message: 'Save redis failed'
-      })
-    }
+    // const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
+    // const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    // const isSetExpireAccessToken = redis.expire(
+    //   token,
+    //   60*60*24
+    // );
+    // const isSetExpire = redis.expire(
+    //   refreshToken,
+    //   60*60*24*2
+    // );
+    // if (isSet && isSetExpire ) {
+    //   console.log('---------- Save redis successfully! ----------');
+    // } else {
+    //   return res.status(400).json({
+    //     result: 0,
+    //     message: 'Save redis failed'
+    //   })
+    // }
 
     if (req.body.token !== "")
     {
@@ -211,26 +215,28 @@ router.post("/google", async function (req, res) {
     const refreshToken = jwt.sign({id: findUser.id}, process.env.JWT_SECRET, {
       expiresIn: "2d"
     });
+    await userRepo.update(findUser.id, { access_token: token, ref_token: refreshToken });
+
     const { exp: tokenExp } = verifyToken(token);
     const { exp: refreshTokenExp } = verifyToken(refreshToken);
-    const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
-    const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
-    const isSetExpireAccessToken = redis.expire(
-      token,
-      60*60*24
-    );
-    const isSetExpire = redis.expire(
-      refreshToken,
-      60*60*24*2
-    );
-    if (isSet && isSetExpire ) {
-      console.log('---------- Save redis successfully! ----------');
-    } else {
-      return res.status(400).json({
-        result: 0,
-        message: 'Save redis failed'
-      })
-    }
+    // const isSetAccessToken = await redis.set(token, JSON.stringify(findUser));
+    // const isSet = await redis.set(refreshToken, JSON.stringify(findUser));
+    // const isSetExpireAccessToken = redis.expire(
+    //   token,
+    //   60*60*24
+    // );
+    // const isSetExpire = redis.expire(
+    //   refreshToken,
+    //   60*60*24*2
+    // );
+    // if (isSet && isSetExpire ) {
+    //   console.log('---------- Save redis successfully! ----------');
+    // } else {
+    //   return res.status(400).json({
+    //     result: 0,
+    //     message: 'Save redis failed'
+    //   })
+    // }
 
     if (req.body.token !== "")
     {
@@ -386,17 +392,23 @@ router.post("/change-password", authorize, async (req, res) => {
 router.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
   const userId = await redis.getAsync(refreshToken);
-  console.log({ userId })
-  if (!userId) {
+  const user = await User.findOne({
+    where: {
+      ref_token: refreshToken
+    }
+  })
+  if (!user) {
     return res.status(400).json({
       result: 0,
       message: 'Invalid Refresh token'
     })
   }
 
-  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
+
+  await userRepo.update(user.id, { access_token: token })
 
   return res.status(200).json({
     token
@@ -408,14 +420,17 @@ router.post("/logout", authorize, async(req, res) => {
     const {authorization} = req.headers;
     const { user } = req;
     const removeToken = await redis.del(authorization)
-    await userRepo.removeDeviceToken(user.id)
+    await Promise.all([
+      userRepo.removeDeviceToken(user.id),
+      userRepo.update(user.id, { access_token: '', ref_token: '' })
+    ])
     return res.status(200).json({
       result: 1,
       message: 'Logout successfully'
     })
   } catch (error) {
     return res.status(400).json({
-      result: 1,
+      result: 0,
       message: error.message
     })
   }
