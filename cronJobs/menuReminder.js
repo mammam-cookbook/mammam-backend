@@ -36,6 +36,15 @@ async function pushNotification(menus) {
                     title: "Meal Plan Reminder",
                     body: recipe.title
                 },
+                data : {
+                  recipeId: recipe.id
+                },
+                android: {
+                    notification: {
+                      icon: 'stock_ticker_update',
+                      color: '#7e55c3'
+                    }
+                },
                 token: user.device_token
             })
         }
