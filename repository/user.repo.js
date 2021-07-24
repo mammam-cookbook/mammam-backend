@@ -442,7 +442,7 @@ async function getCustomization(user_id) {
   {
     temp.push(item.category_id);
   }
-
+  
   let categories;
   if (temp.length === 1) {
     categories = temp[0];
@@ -452,6 +452,9 @@ async function getCustomization(user_id) {
     categories = temp;
     result = {...result, categories};
   }
+  
+  if (result === undefined)
+    result = {};
 
   return result;
 }
