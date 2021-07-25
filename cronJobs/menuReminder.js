@@ -35,9 +35,10 @@ async function pushNotification(menus, time) {
             receiver: user,
             type: notification.type,
             recipe: recipe,
+            time,
             createdAt: createdNotification.createdAt
           }
-        // remindNotification(notificationData)
+        remindNotification(notificationData)
         if (user.device_token) {
             return sendToOne({
                 notification: {
