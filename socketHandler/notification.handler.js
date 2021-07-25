@@ -1,4 +1,4 @@
-const app = require('../server')
+const { app, io } = require('../server')
 exports.sendNotification = (req, notification) => {
     const io = req.app.get("socketio");
     console.log({ io, receiver: notification.receiver.id, sender: notification.sender.id })
@@ -11,7 +11,6 @@ exports.sendNotification = (req, notification) => {
 };
 
 exports.remindNotification = (notification) => {
-  const io = app.get("socketio")
   io.sockets.in(notification.receiver.id).emit("newNotification", {
     notification
   });
