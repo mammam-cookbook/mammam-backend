@@ -11,7 +11,7 @@ exports.sendNotification = (req, notification) => {
 };
 
 exports.remindNotification = (notification) => {
-  io.sockets.in(notification.receiver.id).emit("newNotification", {
+  global.io.sockets.in(notification.receiver.id).emit("newNotification", {
     notification
   });
 }

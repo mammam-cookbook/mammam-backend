@@ -34,6 +34,7 @@ var task = cron.schedule('* * * * *', () => {
 task.start();
 
 app.io = io;
+global.io = io
 app.set("socketio", io);
 io.use(async(socket, next) => {
   console.log("Connections", socket.handshake.query.token )
