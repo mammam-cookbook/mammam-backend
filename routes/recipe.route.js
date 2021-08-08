@@ -248,6 +248,7 @@ router.put("/:id", authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
+    Object.assign(data, { status: 'Pending' });
     const result = await recipeRepo.update(id, data);
     await categoryRecipeRepo.removeCategoriesOfRecipe(id);
     await Promise.all(data.categories.map(category => categoryRecipeRepo.create({ recipe_id: id, category_id: category })))
