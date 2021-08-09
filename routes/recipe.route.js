@@ -10,6 +10,7 @@ const recipeViewsRepo = require("../repository/recipeViews.repo");
 const categoryRecipeRepo = require("../repository/categoryRecipe.repo");
 const getUserId = require("../middlewares/getUserId");
 const elasticRepo = require("../repository/elasticsearch.repo");
+const { debug } = require("../utils/caching");
 
 const convertCommentArrayToTreeArray = (arr) => {
   const hashObj = {};
@@ -96,6 +97,45 @@ router.post("/",authorize, async function (req, res) {
 
 router.post("/draft",authorize, async function (req, res) {
   const recipe = req.body;
+  if (recipe.id !== undefined);
+  {
+    const existedRecipe = await recipeRepo.getById(recipe.id);
+    if (existedRecipe) //existed
+    {
+      try {
+        const data = recipe;
+        const id = recipe.id;
+        Object.assign(data, { status: 'Pending' });
+        
+        const result = await recipeRepo.update(id, data);
+        await categoryRecipeRepo.removeCategoriesOfRecipe(id);
+        await Promise.all(data.categories.map(category => categoryRecipeRepo.create({ recipe_id: id, category_id: category })))
+        const updatedRecipe = await recipeRepo.getById(id);
+        if (result) {
+          await elasticRepo.updateIndexDoc('recipes', updatedRecipe.id, {
+            ...updatedRecipe.dataValues,
+            countReaction: updatedRecipe.reactions.length,
+            categories: data.categories,
+            author: { 
+              id: req.user.id,
+              name: req.user.name,
+              avatar_url: req.user.avatar_url,
+              email: req.user.email
+            } 
+          })
+          return res.status(200).json({
+            result: 1
+          })
+        }
+      } catch (error) {
+        res.status(400).json({
+          result: 0,
+          message: error.message
+        })
+      }
+    }
+  }
+
   const { categories } = recipe;
   Object.assign(recipe, { user_id : req.user.id, status: 'Pending' })
   const createdRecipe = await recipeRepo.create(recipe);
@@ -248,7 +288,6 @@ router.put("/:id", authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
-    Object.assign(data, { status: 'Pending' });
     const result = await recipeRepo.update(id, data);
     await categoryRecipeRepo.removeCategoriesOfRecipe(id);
     await Promise.all(data.categories.map(category => categoryRecipeRepo.create({ recipe_id: id, category_id: category })))
