@@ -58,21 +58,21 @@ services:
     ports:
       - 9300:9300
       - 9200:9200
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.0.1
-    container_name: kibana
-    ports:
-      - 5601:5601
-    environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-  redis-commander:
-    container_name: redis-commander
-    image: rediscommander/redis-commander
-    restart: always
-    environment:
-      - REDIS_HOSTS=redis
-    ports:
-      - "8081:8081"
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:7.0.1
+  #   container_name: kibana
+  #   ports:
+  #     - 5601:5601
+  #   environment:
+  #     ELASTICSEARCH_URL: http://elasticsearch:9200
+  # redis-commander:
+  #   container_name: redis-commander
+  #   image: rediscommander/redis-commander
+  #   restart: always
+  #   environment:
+  #     - REDIS_HOSTS=redis
+  #   ports:
+  #     - "8081:8081"
   # proxy:
   #   image: nginx:alpine
   #   container_name: web-proxy
