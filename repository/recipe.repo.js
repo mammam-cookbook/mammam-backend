@@ -63,6 +63,9 @@ async function getAll(type, user_id) {
     order = [
       [models.sequelize.literal('count'), 'DESC']
     ]
+    where = {
+      status: 'Approved',
+    }
   }
   return await Recipe.findAll({
     where,
