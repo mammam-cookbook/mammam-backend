@@ -419,7 +419,6 @@ router.post("/logout", authorize, async(req, res) => {
   try {
     const {authorization} = req.headers;
     const { user } = req;
-    const removeToken = await redis.del(authorization)
     await Promise.all([
       userRepo.removeDeviceToken(user.id),
       userRepo.update(user.id, { access_token: '', ref_token: '' })
