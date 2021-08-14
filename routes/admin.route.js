@@ -44,8 +44,8 @@ router.post("/unban", authorize, permitRole('admin'), async function (req, res) 
 
 router.delete("/user", authorize, permitRole('admin'), async function (req, res) {
   const user = req.body.user_id;
-  const userDeleted = await userRepo.remove(user);
   const userEmail = await userRepo.getEmailById(user);
+  const userDeleted = await userRepo.remove(user);
   if (userDeleted) {
     sendNewEmailProducer(delete_message(userEmail.dataValues.email));
     res.status(200).json({

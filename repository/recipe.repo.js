@@ -8,8 +8,8 @@ const { Op } = require('sequelize');
 const { isArray } = require("lodash");
 const userRepo = require("../repository/user.repo");
 
-async function getAll(type, user_id) {
-  console.log({ type, user_id })
+async function getAll(type, user_id, offset, limit) {
+  console.log({ type, user_id, offset, limit })
   let where;
   let attributes;
   let order;
@@ -21,7 +21,7 @@ async function getAll(type, user_id) {
       finalQuery = await userRepo.getCustomization(user_id); 
     }
 
-    let reactionOrder = 'asc';
+    let reactionOrder = 'desc';
     
     if (finalQuery.excludeIngredients) {
       if (Array.isArray(finalQuery.excludeIngredients)) {
@@ -32,7 +32,7 @@ async function getAll(type, user_id) {
         excludeIngredients = finalQuery.excludeIngredients.toLowerCase();
       }
     }
-    finalQuery = {...finalQuery, excludeIngredients, reactionOrder }
+    finalQuery = {...finalQuery, excludeIngredients, reactionOrder, offset, limit }
     console.log(finalQuery);
     
     const data = await RecommendSearch(finalQuery);
@@ -71,6 +71,8 @@ async function getAll(type, user_id) {
     where,
     attributes,
     order,
+    offset,
+    limit,
     include: [
       {
         model: models.User,

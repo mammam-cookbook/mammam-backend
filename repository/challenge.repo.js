@@ -18,7 +18,7 @@ async function query({ limit = 10, offset = 0, recipe_id }) {
                 attributes: ['id', 'name', 'avatar_url', 'email']
             }
         ],
-        attributes: ['id','images','content'],
+        //attributes: ['id','images','content'],
         where: {
             recipe_id
         },
