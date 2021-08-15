@@ -53,7 +53,7 @@ router.get("/rec", async function (req, res) {
 });
 
 router.get("/list",getUserId, async function (req, res) {
-  const result = await recipeRepo.getAll(req.query.type, req.userId);
+  const result = await recipeRepo.getAll(req.query.type, req.userId, req.query.offset, req.query.limit);
   if (result) {
     res.status(200).json({
       result
