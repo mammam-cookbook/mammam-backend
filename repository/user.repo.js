@@ -23,12 +23,12 @@ async function searchUsers({ limit = 10, offset = 0, keyword }) {
         {
           email: { [Op.iLike]: `%${keyword}%` }
         }
-      ]
-
+      ],
+      role: 'user'
     },
     limit,
     offset,
-    attributes: { exclude: ["password"] },
+    attributes: { exclude: ["password", "ref_token", "access_token", "reset_password_token", "expire_token"] },
   });
 }
 
