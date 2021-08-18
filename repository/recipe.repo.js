@@ -546,7 +546,7 @@ async function getById(id) {
       {
         model: models.Challenge,
         as: 'challenges',
-        attributes: ['id', 'images', 'content'],
+        attributes: ['id', 'images', 'content', 'created_at', 'updated_at'],
         include: [
           {
             model: models.User,
