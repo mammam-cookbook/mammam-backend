@@ -400,8 +400,26 @@ async function search({ search, categories, limit = 10, offset = 0, hashtag, ing
   let sortField = [];
   let mustNotQuery = [];
   let shouldQuery= [];
+  if (ingredients) {
+    ingredients = isArray(ingredients) ? ingredients : [ingredients]
+    ingredients = ingredients.map(ingredient => ingredient.toLowerCase())
+    if (ingredients.length > 1) {
+      mustQuery.push({
+        terms: {
+          "ingredients_name.keyword": ingredients
+        }
+      })
+    } else {
+      mustQuery.push({
+        term: {
+          "ingredients_name.keyword": ingredients[0]
+        }
+      })
+    }
+  }
   if (excludeIngredients) {
     excludeIngredients = isArray(excludeIngredients) ? excludeIngredients : [excludeIngredients]
+    excludeIngredients = excludeIngredients.map(ingredient => ingredient.toLowerCase())
     if (excludeIngredients.length > 1) {
       mustNotQuery.push({
         terms: {

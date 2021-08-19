@@ -97,11 +97,7 @@ router.post("/",authorize, async function (req, res) {
 
 router.post("/draft",authorize, async function (req, res) {
   const recipe = req.body;
-<<<<<<< HEAD
   if (recipe.id)
-=======
-  if (recipe.id !== undefined)
->>>>>>> 868efe1062e00e9f5b028384a7f3348d9fe38826
   {
     const existedRecipe = await recipeRepo.getById(recipe.id);
     if (existedRecipe) //existed

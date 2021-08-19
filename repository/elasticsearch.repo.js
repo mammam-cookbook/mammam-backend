@@ -62,7 +62,8 @@ async function init() {
     recipeList = recipeList.map(recipe => recipe.dataValues)
     const body = recipeList.flatMap(doc => [{ index: { _index: 'recipes', _id: doc.id } }, {...doc, 
       categories: doc.categories.map(category => category.category_id),
-      countReaction: doc.reactions.length
+      countReaction: doc.reactions.length,
+      ingredients_name: doc.ingredients_name ? doc.ingredients_name.map(name => name.toLowerCase()) : []
     }])
     console.log({ recipeList })
     if (recipeList.length > 0) {
