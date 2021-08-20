@@ -404,10 +404,12 @@ async function search({ search, categories, limit = 10, offset = 0, hashtag, ing
     ingredients = isArray(ingredients) ? ingredients : [ingredients]
     ingredients = ingredients.map(ingredient => ingredient.toLowerCase())
     if (ingredients.length > 1) {
-      mustQuery.push({
-        terms: {
-          "ingredients_name.keyword": ingredients
-        }
+      ingredients.forEach(ingredient => {
+        mustQuery.push({
+          term: {
+            "ingredients_name.keyword": ingredient
+          }
+        })
       })
     } else {
       mustQuery.push({
