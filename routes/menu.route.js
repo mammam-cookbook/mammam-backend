@@ -19,7 +19,7 @@ router.get("/", authorize, async function (req, res) {
     result[i] = result[i].toJSON();
     result[i+1] = result[i+1].toJSON();
     console.log({ result: result[i], afterResult: result[i+1], i})
-    if (result[i].timestamp === result[i+1].timestamp && timeValue[result[i]].session > timeValue[result[i+1].session]) {
+    if (result[i].timestamp === result[i+1].timestamp && timeValue[result[i].session] > timeValue[result[i+1].session]) {
       [result[i], result[i+1]] = [result[i+1], result[i]];
     }
   }
