@@ -54,7 +54,10 @@ async function getRecipesBetweenTwoDates(start, end, user_id) {
             as: 'user',
             attributes: ['id', 'name', 'avatar_url', 'email']
           }
-        ]
+        ],
+        order: [
+          ['timestamp', 'ASC']
+      ],
     })
 }
 
