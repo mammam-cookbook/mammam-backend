@@ -17,6 +17,7 @@ router.get("/", authorize, async function (req, res) {
   let result = await menuRepo.getRecipesBetweenTwoDates(startDate, endDate, user_id);
   for (let i = 0; i < result.length - 1; i++) {
     result[i] = result[i].toJSON();
+    result[i+1] = result[i+1].toJSON();
     console.log({ result: result[i], afterResult: result[i+1], i})
     if (result[i].timestamp === result[i+1].timestamp && timeValue[result[i]].session > timeValue[result[i+1].session]) {
       [result[i], result[i+1]] = [result[i+1], result[i]];
