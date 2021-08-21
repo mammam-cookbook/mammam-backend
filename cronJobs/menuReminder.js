@@ -69,7 +69,7 @@ exports.remindRecipeInMenu = async () => {
     if (hours > 20) {
         time = 'morning'
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'morning')
-    } else if (hours < 10) {
+    } else if (hours < 11) {
         timr = 'noon'
         unixTime = moment().utc().startOf('days').unix()
         remindRecipes = await menuRepo.findRecipeInSession(unixTime, 'noon')
