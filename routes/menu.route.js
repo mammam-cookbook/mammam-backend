@@ -21,6 +21,11 @@ router.get("/", authorize, async function (req, res) {
       [result[i], result[i+1]] = [result[i+1], result[i]];
     }
   }
+  for (let i = 0; i < result.length - 1; i++) {
+    if (result[i].timestamp === result[i+1].timestamp && timeValue[result[i].session] > timeValue[result[i+1].session]) {
+      [result[i], result[i+1]] = [result[i+1], result[i]];
+    }
+  }
   if (result) {
     res.status(200).json({
       result
